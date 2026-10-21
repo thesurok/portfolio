@@ -2,10 +2,6 @@ const PHONE = { w: 390, h: 844, bezel: 12 };
 const TABLET = { w: 834, h: 1112, bezel: 18 };
 const MESSAGE_SOURCE = 'portfolio-build';
 
-interface FittedPlayer extends HTMLElement {
-  __fit?: () => void;
-}
-
 interface ActivePlayer {
   root: HTMLElement;
   unload: () => void;
@@ -39,7 +35,6 @@ function applyFrame(
   root.style.setProperty('--h', String(height));
   root.style.setProperty('--bezel', `${base.bezel}px`);
   setPressed(root, preset, landscape);
-  (root as FittedPlayer).__fit?.();
 }
 
 function lockPage(locked: boolean): void {
@@ -99,7 +94,6 @@ function initPlayer(root: HTMLElement): void {
     root.classList.remove('is-open');
     closeButton?.setAttribute('hidden', '');
     if (!root.classList.contains('is-fullscreen')) lockPage(false);
-    (root as FittedPlayer).__fit?.();
   };
 
   const openOverlay = () => {
@@ -107,7 +101,6 @@ function initPlayer(root: HTMLElement): void {
     root.classList.add('is-open');
     closeButton?.removeAttribute('hidden');
     lockPage(true);
-    (root as FittedPlayer).__fit?.();
     closeButton?.focus();
   };
 
@@ -293,7 +286,6 @@ function initPlayer(root: HTMLElement): void {
     if (fullscreenButton) fullscreenButton.textContent = on ? 'Exit full screen' : 'Full screen';
     fullscreenButton?.setAttribute('aria-pressed', String(on));
     if (!on && !root.classList.contains('is-open')) lockPage(false);
-    (root as FittedPlayer).__fit?.();
   });
 
   window.addEventListener('message', (event) => {

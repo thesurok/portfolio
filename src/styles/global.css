@@ -212,12 +212,16 @@ main {
 .hero {
   position: relative;
   isolation: isolate;
-  overflow: hidden;
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 32px;
   align-items: center;
   min-height: calc(100vh - var(--header) - 48px);
+  padding-top: 48px;
+}
+
+.hero:has(.hero-bg) {
+  overflow: hidden;
   padding: 48px 28px 32px;
   border-radius: 28px;
 }

@@ -97,41 +97,6 @@ const videoSrc = video ? withBase(video) : undefined;
   import '../scripts/player.ts';
 </script>
 
-<script is:inline define:vars={{ playerId: `player-${slug}` }}>
-  (() => {
-    const player = document.getElementById(playerId);
-    if (!player || player.dataset.fitReady === 'true') return;
-    player.dataset.fitReady = 'true';
-    const stage = player.querySelector('[data-stage]');
-    const fitEl = player.querySelector('[data-fit]');
-    if (!stage || !fitEl) return;
-
-    const fit = () => {
-      const w = Number(player.style.getPropertyValue('--w'));
-      const h = Number(player.style.getPropertyValue('--h'));
-      const bezel = parseFloat(player.style.getPropertyValue('--bezel')) || 0;
-      const outerW = w + bezel * 2;
-      const outerH = h + bezel * 2;
-      const open = player.classList.contains('is-open') || player.classList.contains('is-fullscreen');
-      const availW = stage.clientWidth || outerW;
-      const availH = open
-        ? Math.max(240, window.innerHeight - 148)
-        : Math.min(window.innerHeight * 0.72, 760);
-      const scale = Math.max(0.2, Math.min(1, availW / outerW, availH / outerH));
-      player.style.setProperty('--scale', String(Math.round(scale * 1000) / 1000));
-      fitEl.style.height = Math.round(outerH * scale) + 'px';
-    };
-
-    player.__fit = fit;
-    fit();
-    const observer = new ResizeObserver(() => fit());
-    observer.observe(stage);
-    window.addEventListener('resize', () => {
-      if (player.isConnected) fit();
-    });
-  })();
-</script>
-
 <style>
   .visually-hidden {
     position: absolute;

@@ -9,13 +9,18 @@ import { visibleProjects, withBase } from '../lib/paths';
 const projects = visibleProjects(await getCollection('projects'));
 const featured = projects.filter((project) => project.data.featured);
 const slots = projects.filter((project) => project.data.tags.includes('casino-style'));
-const showHeroWidget = false;
+const showHeroBackground = false;
+const showHeroWidget = true;
 ---
 
 <BaseLayout title={`${site.name} — HTML5 Game Developer`} description={site.pitch} ogAlt={site.pitch}>
   <div class="wrap">
     <section class="hero">
-      <canvas class="hero-bg" data-hero-field data-hero-variant="background" aria-hidden="true"></canvas>
+      {
+        showHeroBackground && (
+          <canvas class="hero-bg" data-hero-field data-hero-variant="background" aria-hidden="true"></canvas>
+        )
+      }
       <div class="hero-copy">
         <p class="eyebrow">{site.role}</p>
         <h1>{site.name}</h1>

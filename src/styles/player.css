@@ -1,6 +1,8 @@
 .player {
   --bezel: 12px;
-  --scale: 1;
+  --outer-w: calc(var(--w) * 1px + 2 * var(--bezel));
+  --outer-h: calc(var(--h) * 1px + 2 * var(--bezel));
+  --fit-max: min(72vh, 760px);
   display: grid;
   gap: 16px;
   min-width: 0;
@@ -15,6 +17,7 @@
   background: var(--bg);
   grid-template-rows: auto minmax(0, 1fr) auto;
   overflow: auto;
+  --fit-max: max(240px, calc(100vh - 148px));
 }
 
 .player.is-fullscreen {
@@ -34,12 +37,14 @@
 .player-stage {
   min-width: 0;
   overflow: hidden;
+  container-type: inline-size;
 }
 
 .player-fit {
+  --fit-scale: min(1, 100cqw / var(--outer-w), var(--fit-max) / var(--outer-h));
   position: relative;
   width: 100%;
-  height: min(72vh, calc(var(--h) * 1px + 2 * var(--bezel)));
+  height: calc(var(--outer-h) * var(--fit-scale));
 }
 
 .device {
@@ -55,7 +60,7 @@
   box-shadow:
     0 0 0 1px rgba(255, 255, 255, 0.08),
     var(--shadow);
-  transform: translateX(-50%) scale(var(--scale));
+  transform: translateX(-50%) scale(var(--fit-scale));
   transform-origin: top center;
 }
 
