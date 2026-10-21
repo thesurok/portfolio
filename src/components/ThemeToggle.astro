@@ -1,0 +1,68 @@
+<button class="theme-toggle" type="button" data-theme-toggle aria-pressed="false" aria-label="Switch to light theme">
+  <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.8"></circle>
+    <path
+      d="M12 3v2.2M12 18.8V21M3 12h2.2M18.8 12H21M5.6 5.6l1.6 1.6M16.8 16.8l1.6 1.6M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linecap="round"></path>
+  </svg>
+  <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true">
+    <path
+      d="M15.5 3.5a8.2 8.2 0 1 0 5 12.2A7 7 0 0 1 15.5 3.5Z"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.8"
+      stroke-linejoin="round"></path>
+  </svg>
+</button>
+
+<script>
+  const storageKey = 'theme';
+
+  function currentTheme(): 'light' | 'dark' {
+    return document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
+  }
+
+  function applyTheme(theme: 'light' | 'dark', persist: boolean) {
+    document.documentElement.dataset.theme = theme;
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute('content', theme === 'light' ? '#f3f1eb' : '#101114');
+    if (persist) localStorage.setItem(storageKey, theme);
+    document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]').forEach((button) => {
+      const nextLight = theme === 'dark';
+      button.setAttribute('aria-pressed', String(theme === 'light'));
+      button.setAttribute('aria-label', nextLight ? 'Switch to light theme' : 'Switch to dark theme');
+    });
+  }
+
+  function bootTheme() {
+    document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]').forEach((button) => {
+      if (button.dataset.ready === 'true') return;
+      button.dataset.ready = 'true';
+      button.addEventListener('click', () => {
+        applyTheme(currentTheme() === 'dark' ? 'light' : 'dark', true);
+      });
+    });
+    applyTheme(currentTheme(), false);
+  }
+
+  document.addEventListener('astro:page-load', bootTheme);
+  document.addEventListener('astro:after-swap', () => {
+    const stored = localStorage.getItem(storageKey);
+    const theme =
+      stored === 'light' || stored === 'dark'
+        ? stored
+        : window.matchMedia('(prefers-color-scheme: light)').matches
+          ? 'light'
+          : 'dark';
+    applyTheme(theme, false);
+  });
+  bootTheme();
+
+  const media = window.matchMedia('(prefers-color-scheme: light)');
+  media.addEventListener('change', (event) => {
+    if (!localStorage.getItem(storageKey)) applyTheme(event.matches ? 'light' : 'dark', false);
+  });
+</script>

@@ -1,0 +1,99 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ContactList from '../components/ContactList.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import { site, skills } from '../data/site';
+import { sortProjects, withBase } from '../lib/paths';
+
+const projects = sortProjects(await getCollection('projects'));
+const featured = projects.filter((project) => project.data.featured);
+const slots = projects.filter((project) => project.data.tags.includes('casino-style'));
+---
+
+<BaseLayout title={`${site.name} — HTML5 Game Developer`} description={site.pitch} ogAlt={site.pitch}>
+  <div class="wrap">
+    <section class="hero">
+      <div>
+        <p class="eyebrow">{site.role}</p>
+        <h1>{site.name}</h1>
+        <p class="pitch">{site.pitch}</p>
+        <div class="actions">
+          <a class="btn btn-primary" href={withBase('work/')}>View work</a>
+          <a class="btn btn-ghost" href="#contact">Contact</a>
+        </div>
+      </div>
+      <div class="hero-visual" aria-hidden="true">
+        <canvas id="hero-field"></canvas>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="featured-title">
+      <div class="section-head">
+        <h2 id="featured-title">Selected work</h2>
+        <a href={withBase('work/')}>All projects</a>
+      </div>
+      <div class="project-grid">
+        {featured.map((project, index) => <ProjectCard project={project} eager={index === 0} />)}
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="slots-title">
+      <div class="section-head">
+        <div>
+          <h2 id="slots-title">Slots / Casino concepts</h2>
+          <p>Reel and spin studies. More demos will land here.</p>
+        </div>
+      </div>
+      <div class="project-grid">
+        {slots.map((project) => <ProjectCard project={project} />)}
+        <article class="placeholder-card">
+          <p class="eyebrow">In progress</p>
+          <h3>Next concept</h3>
+          <p>A slots demo will be added here.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="skills-title">
+      <div class="section-head">
+        <div>
+          <h2 id="skills-title">Skills</h2>
+          <p>What carries into slots and other real-time work.</p>
+        </div>
+      </div>
+      <ol class="skill-list">
+        {
+          skills.map((skill, index) => (
+            <li>
+              <span>{String(index + 1).padStart(2, '0')}</span>
+              {skill}
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+
+    <section class="section contact-block" id="contact" aria-labelledby="contact-title">
+      <h2 id="contact-title">Contact</h2>
+      <p>Open to interactive builds for browser and mobile. {site.location}.</p>
+      <ContactList />
+    </section>
+  </div>
+</BaseLayout>
+
+<script>
+  import { mountHero } from '../scripts/hero';
+
+  let stop: () => void = () => undefined;
+
+  function bootHero() {
+    stop();
+    stop = () => undefined;
+    const canvas = document.querySelector<HTMLCanvasElement>('#hero-field');
+    if (canvas) stop = mountHero(canvas);
+  }
+
+  document.addEventListener('astro:page-load', bootHero);
+  bootHero();
+</script>

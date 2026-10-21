@@ -1,0 +1,135 @@
+---
+import { getCollection, render } from 'astro:content';
+import { getImage } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import BuildPlayer from '../../components/BuildPlayer.astro';
+import { site, tagLabel, techLabels } from '../../data/site';
+import { buildSizeKB } from '../../lib/build-size';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects');
+  return projects.map((project) => ({
+    params: { slug: project.data.slug },
+    props: { project },
+  }));
+}
+
+const { project } = Astro.props;
+const { Content } = await render(project);
+const poster = project.data.poster as ImageMetadata;
+const og = await getImage({ src: poster, width: 1200, height: 630, format: 'jpeg' });
+const ogImage = new URL(og.src, Astro.site).href;
+const sizeKB = project.data.build.sizeKB ?? buildSizeKB(project.data.build.path);
+const description = project.data.summary;
+const creativeWork = {
+  '@context': 'https://schema.org',
+  '@type': 'CreativeWork',
+  name: project.data.title,
+  description,
+  url: new URL(Astro.url.pathname, Astro.site).href,
+  dateCreated: String(project.data.year),
+  keywords: [...project.data.tags, ...project.data.tech].join(', '),
+  image: ogImage,
+  author: { '@type': 'Person', name: site.name, url: 'https://github.com/thesurok' },
+};
+---
+
+<BaseLayout
+  title={`${project.data.title} — ${site.name}`}
+  description={description}
+  ogImage={ogImage}
+  ogAlt={`${project.data.title} poster`}
+  jsonLd={[creativeWork]}
+>
+  <div class="wrap">
+    <header class="page-head">
+      <p class="eyebrow">
+        {project.data.year}
+        {project.data.client ? ` · ${project.data.client}` : ''}
+      </p>
+      <h1>{project.data.title}</h1>
+      <ul class="tag-list">
+        {project.data.tags.map((tag) => <li class="tag">{tagLabel(tag)}</li>)}
+      </ul>
+    </header>
+    <div class="project-layout">
+      <BuildPlayer
+        slug={project.data.slug}
+        title={project.data.title}
+        buildPath={project.data.build.path}
+        orientation={project.data.build.orientation}
+        poster={poster}
+        video={project.data.video}
+      />
+      <div class="project-details">
+        <p class="lead">{project.data.summary}</p>
+        <div class="prose">
+          <Content />
+        </div>
+        <section>
+          <h2>Role</h2>
+          <p>{project.data.role}</p>
+        </section>
+        {
+          project.data.highlights.length > 0 && (
+            <section>
+              <h2>Highlights</h2>
+              <ul class="plain-list">
+                {project.data.highlights.map((item) => (
+                  <li>{item}</li>
+                ))}
+              </ul>
+            </section>
+          )
+        }
+        {
+          project.data.challenges.length > 0 && (
+            <section>
+              <h2>Challenges</h2>
+              <ul class="challenges">
+                {project.data.challenges.map((item) => (
+                  <li>
+                    <p class="challenge-problem">{item.problem}</p>
+                    <p>{item.solution}</p>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )
+        }
+        <section>
+          <h2>Build metrics</h2>
+          <dl class="metrics">
+            <div>
+              <dt class="metric-label">File size</dt>
+              <dd>{sizeKB} KB</dd>
+            </div>
+            {
+              project.data.build.fpsTarget && (
+                <div>
+                  <dt class="metric-label">FPS target</dt>
+                  <dd>{project.data.build.fpsTarget}</dd>
+                </div>
+              )
+            }
+            {
+              project.data.build.loadTimeMs && (
+                <div>
+                  <dt class="metric-label">Load target</dt>
+                  <dd>{project.data.build.loadTimeMs} ms</dd>
+                </div>
+              )
+            }
+          </dl>
+        </section>
+        <section>
+          <h2>Tech</h2>
+          <ul class="tag-list">
+            {project.data.tech.map((item) => <li class="tag">{techLabels[item]}</li>)}
+          </ul>
+        </section>
+      </div>
+    </div>
+  </div>
+</BaseLayout>

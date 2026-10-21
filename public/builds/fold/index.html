@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Fold</title>
+    <style>
+      :root { color-scheme: dark; }
+      html, body { margin: 0; height: 100%; background: #121318; color: #f2efe8; font-family: "Segoe UI", sans-serif; }
+      body { overflow: hidden; display: grid; place-items: center; }
+      main { width: min(100% - 24px, 420px); display: grid; gap: 12px; }
+      h1 { margin: 0; font-size: 1.4rem; }
+      .board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+      .board button { aspect-ratio: 1; min-height: 44px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.12); background: #1c1e26; color: transparent; }
+      .board button.on { background: #e2a45c; }
+      .row { display: flex; gap: 8px; }
+      .row button { min-height: 44px; flex: 1; border-radius: 10px; font: inherit; cursor: pointer; }
+      .primary { background: #e2a45c; color: #1b140c; font-weight: 600; border: 0; }
+      .ghost { background: transparent; color: #f2efe8; border: 1px solid rgba(255,255,255,0.2); }
+      p { margin: 0; color: #a8a297; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Fold</h1>
+      <p id="status">Turn every tile off.</p>
+      <div class="board" id="board"></div>
+      <div class="row">
+        <button class="ghost" id="retry" type="button">New deal</button>
+        <button class="primary" id="go" type="button" hidden>Continue</button>
+      </div>
+    </main>
+    <script>
+      function cta(url) {
+        try {
+          if (window.mraid && typeof mraid.open === 'function') return void mraid.open(url);
+          if (window.FbPlayableAd && typeof FbPlayableAd.onCTAClick === 'function') return void FbPlayableAd.onCTAClick();
+          if (window.ExitApi && typeof ExitApi.exit === 'function') ExitApi.exit();
+        } catch (error) {}
+      }
+      const N = 5;
+      const board = document.getElementById('board');
+      const buttons = [];
+      let on = [];
+      function index(r, c) { return r * N + c; }
+      function toggle(i) {
+        const r = Math.floor(i / N), c = i % N;
+        [[0, 0], [-1, 0], [1, 0], [0, -1], [0, 1]].forEach(([dr, dc]) => {
+          const rr = r + dr, cc = c + dc;
+          if (rr >= 0 && cc >= 0 && rr < N && cc < N) on[index(rr, cc)] = !on[index(rr, cc)];
+        });
+      }
+      function paint() {
+        buttons.forEach((button, i) => {
+          button.classList.toggle('on', on[i]);
+          button.setAttribute('aria-pressed', String(on[i]));
+        });
+        const clear = on.every((value) => !value);
+        document.getElementById('status').textContent = clear ? 'Clear' : 'Turn every tile off.';
+        document.getElementById('go').hidden = !clear;
+      }
+      function deal() {
+        on = Array(N * N).fill(false);
+        for (let k = 0; k < 8; k++) toggle(Math.floor(Math.random() * N * N));
+        paint();
+      }
+      for (let i = 0; i < N * N; i++) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.setAttribute('aria-label', 'Tile ' + (i + 1));
+        button.addEventListener('click', () => { toggle(i); paint(); });
+        board.append(button);
+        buttons.push(button);
+      }
+      document.getElementById('retry').onclick = deal;
+      document.getElementById('go').onclick = () => cta('https://thesurok.github.io/portfolio/');
+      deal();
+    </script>
+  </body>
+</html>

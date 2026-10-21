@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Kinetic Stack</title>
+    <style>
+      :root { color-scheme: dark; }
+      html, body { margin: 0; height: 100%; background: #121318; color: #f2efe8; font-family: "Segoe UI", sans-serif; }
+      body { overflow: hidden; }
+      canvas { width: 100%; height: 100%; display: block; touch-action: none; }
+      button { min-height: 44px; border-radius: 10px; border: 0; padding: 0 14px; font: inherit; cursor: pointer; }
+      .primary { background: #e2a45c; color: #1b140c; font-weight: 600; }
+      .ghost { background: transparent; color: #f2efe8; border: 1px solid rgba(255,255,255,0.2); }
+      .bar { position: fixed; left: 12px; right: 12px; bottom: 12px; display: none; gap: 8px; align-items: center; padding: 10px; border-radius: 14px; background: rgba(20,22,28,0.94); border: 1px solid rgba(255,255,255,0.12); }
+      .bar.show { display: flex; }
+    </style>
+  </head>
+  <body>
+    <canvas id="c" aria-label="Tap to drop a shape"></canvas>
+    <div class="bar" id="end">
+      <span id="label"></span>
+      <button class="ghost" id="retry" type="button">Retry</button>
+      <button class="primary" id="go" type="button">Continue</button>
+    </div>
+    <script>
+      function cta(url) {
+        try {
+          if (window.mraid && typeof mraid.open === 'function') return void mraid.open(url);
+          if (window.FbPlayableAd && typeof FbPlayableAd.onCTAClick === 'function') return void FbPlayableAd.onCTAClick();
+          if (window.ExitApi && typeof ExitApi.exit === 'function') ExitApi.exit();
+        } catch (error) {}
+      }
+      const canvas = document.getElementById('c');
+      const ctx = canvas.getContext('2d');
+      const colors = ['#e2a45c', '#6cb6a6', '#e07a7a', '#7aa2e3', '#d6c48a'];
+      let W = 1, H = 1, bodies = [], alive = true, last = 0;
+      function resize() {
+        const dpr = Math.min(devicePixelRatio || 1, 2);
+        W = canvas.clientWidth; H = canvas.clientHeight;
+        canvas.width = Math.max(1, Math.round(W * dpr));
+        canvas.height = Math.max(1, Math.round(H * dpr));
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+      function reset() {
+        bodies = []; alive = true; last = 0;
+        document.getElementById('end').classList.remove('show');
+      }
+      function drop(x) {
+        if (!alive) return;
+        const r = 16 + Math.random() * 10;
+        bodies.push({ x: Math.min(W - r, Math.max(r, x)), y: r + 8, vx: 0, vy: 0, r, color: colors[bodies.length % colors.length] });
+      }
+      function loop(now) {
+        requestAnimationFrame(loop);
+        const dt = Math.min(0.02, last ? (now - last) / 1000 : 0.016);
+        last = now;
+        if (alive) {
+          for (const body of bodies) { body.vy += 1600 * dt; body.x += body.vx * dt; body.y += body.vy * dt; }
+          for (const body of bodies) {
+            if (body.y + body.r > H - 16) { body.y = H - 16 - body.r; body.vy *= -0.15; body.vx *= 0.8; }
+            if (body.x < body.r) { body.x = body.r; body.vx *= -0.4; }
+            if (body.x > W - body.r) { body.x = W - body.r; body.vx *= -0.4; }
+          }
+          for (let i = 0; i < bodies.length; i++) for (let j = i + 1; j < bodies.length; j++) {
+            const a = bodies[i], b = bodies[j];
+            const dx = b.x - a.x, dy = b.y - a.y, dist = Math.hypot(dx, dy) || 0.001;
+            const min = a.r + b.r;
+            if (dist < min) {
+              const nx = dx / dist, ny = dy / dist, overlap = (min - dist) / 2;
+              a.x -= nx * overlap; a.y -= ny * overlap; b.x += nx * overlap; b.y += ny * overlap;
+              const rel = (b.vx - a.vx) * nx + (b.vy - a.vy) * ny;
+              if (rel < 0) { a.vx += rel * nx * 0.5; a.vy += rel * ny * 0.5; b.vx -= rel * nx * 0.5; b.vy -= rel * ny * 0.5; }
+            }
+          }
+          const newest = bodies[bodies.length - 1];
+          if (bodies.some((body) => body !== newest && body.y - body.r < 40)) {
+            alive = false;
+            document.getElementById('label').textContent = bodies.length + ' stacked';
+            document.getElementById('end').classList.add('show');
+          }
+        }
+        ctx.fillStyle = '#121318'; ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = '#f2efe8'; ctx.font = '600 18px Segoe UI, sans-serif';
+        ctx.fillText(bodies.length + ' stacked', 16, 32);
+        ctx.fillStyle = '#2a241c'; ctx.fillRect(0, H - 16, W, 16);
+        for (const body of bodies) { ctx.fillStyle = body.color; ctx.beginPath(); ctx.arc(body.x, body.y, body.r, 0, Math.PI * 2); ctx.fill(); }
+      }
+      addEventListener('resize', resize); resize(); requestAnimationFrame(loop);
+      canvas.addEventListener('pointerdown', (event) => {
+        const rect = canvas.getBoundingClientRect();
+        drop(event.clientX - rect.left);
+      });
+      document.getElementById('retry').onclick = reset;
+      document.getElementById('go').onclick = () => cta('https://thesurok.github.io/portfolio/');
+    </script>
+  </body>
+</html>

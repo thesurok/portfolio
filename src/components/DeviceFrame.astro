@@ -1,0 +1,13 @@
+---
+interface Props {
+  preset?: 'phone' | 'tablet';
+}
+
+const { preset = 'phone' } = Astro.props;
+---
+
+<div class="device" data-device data-preset={preset}>
+  <div class="screen" data-screen>
+    <slot />
+  </div>
+</div>

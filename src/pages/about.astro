@@ -1,0 +1,60 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ContactList from '../components/ContactList.astro';
+import { experience, site, tools } from '../data/site';
+import { withBase } from '../lib/paths';
+
+const description =
+  'Bio, experience, and toolset for Oleh Novytskyi, an interactive / HTML5 game developer working in PixiJS and Three.js.';
+---
+
+<BaseLayout title={`About — ${site.name}`} description={description}>
+  <div class="wrap">
+    <header class="page-head">
+      <p class="eyebrow">{site.role}</p>
+      <h1>About</h1>
+    </header>
+    <div class="about-grid section">
+      <p>
+        I design and build interactive HTML5 games and real-time scenes for the browser and for
+        mobile. Eight years of that has been PixiJS, Three.js, and the work that keeps them at a
+        steady frame rate: budgets, batching, and timelines.
+      </p>
+      <p>
+        Shipped client work is usually under NDA. Projects here are mechanic studies, with client
+        art removed or redrawn. A client name shows up only when it can be shown.
+      </p>
+      <p>
+        <a class="btn btn-primary" href={withBase('cv.pdf')} download>Download CV (PDF)</a>
+      </p>
+    </div>
+
+    <section class="section" aria-labelledby="experience-title">
+      <h2 id="experience-title">Experience</h2>
+      <ol class="timeline">
+        {
+          experience.map((item) => (
+            <li>
+              <p class="when">{item.period}</p>
+              <h3>{item.title}</h3>
+              <p>{item.body}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </section>
+
+    <section class="section" aria-labelledby="tools-title">
+      <h2 id="tools-title">Toolset</h2>
+      <ul class="tool-list">
+        {tools.map((tool) => <li>{tool}</li>)}
+      </ul>
+    </section>
+
+    <section class="section contact-block" aria-labelledby="about-contact-title">
+      <h2 id="about-contact-title">Contact</h2>
+      <p>{site.location}.</p>
+      <ContactList />
+    </section>
+  </div>
+</BaseLayout>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Signal Bloom</title>
+    <style>
+      :root { color-scheme: dark; }
+      html, body { margin: 0; height: 100%; background: #090a0d; color: #f2efe8; font-family: "Segoe UI", sans-serif; }
+      body { overflow: hidden; }
+      canvas { width: 100%; height: 100%; display: block; touch-action: none; }
+      button { position: fixed; right: 12px; bottom: 12px; min-height: 44px; padding: 0 14px; border: 0; border-radius: 10px; background: #e2a45c; color: #1b140c; font: 600 16px/1 "Segoe UI", sans-serif; cursor: pointer; }
+    </style>
+  </head>
+  <body>
+    <canvas id="c" aria-label="Particle field. Move the pointer to pull the bloom."></canvas>
+    <button id="go" type="button">Continue</button>
+    <script>
+      function cta(url) {
+        try {
+          if (window.mraid && typeof mraid.open === 'function') return void mraid.open(url);
+          if (window.FbPlayableAd && typeof FbPlayableAd.onCTAClick === 'function') return void FbPlayableAd.onCTAClick();
+          if (window.ExitApi && typeof ExitApi.exit === 'function') ExitApi.exit();
+        } catch (error) {}
+      }
+      const canvas = document.getElementById('c');
+      const gl = canvas.getContext('webgl', { antialias: false, alpha: false });
+      const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const pointer = { x: 0, y: 0 };
+      if (gl) {
+        const count = 700;
+        const ids = new Float32Array(count);
+        for (let i = 0; i < count; i++) ids[i] = i;
+        const vs = [
+          'attribute float aId;uniform vec2 uRes;uniform float uTime;uniform vec2 uPointer;',
+          'varying float vR;',
+          'void main(){',
+          '  float n=fract(sin(aId*12.9898)*43758.5453);',
+          '  float ang=aId*2.399+uTime*(0.15+n*0.35);',
+          '  float rad=0.08+n*0.72;',
+          '  vec2 p=vec2(cos(ang),sin(ang*1.17))*rad;',
+          '  vec2 pull=uPointer-p; p+=pull*0.18/(1.0+dot(pull,pull)*4.0);',
+          '  gl_Position=vec4(p,0.0,1.0);',
+          '  gl_PointSize=(2.0+n*5.0)*(uRes.y/700.0); vR=n;',
+          '}',
+        ].join('');
+        const fs = 'precision mediump float;varying float vR;void main(){vec2 q=gl_PointCoord-0.5; if(dot(q,q)>0.25) discard; vec3 col=mix(vec3(0.42,0.71,0.65), vec3(0.89,0.64,0.36), vR); gl_FragColor=vec4(col,0.85);}';
+        function shader(type, source) {
+          const item = gl.createShader(type);
+          gl.shaderSource(item, source); gl.compileShader(item); return item;
+        }
+        const program = gl.createProgram();
+        gl.attachShader(program, shader(gl.VERTEX_SHADER, vs));
+        gl.attachShader(program, shader(gl.FRAGMENT_SHADER, fs));
+        gl.linkProgram(program); gl.useProgram(program);
+        const buffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+        gl.bufferData(gl.ARRAY_BUFFER, ids, gl.STATIC_DRAW);
+        const loc = gl.getAttribLocation(program, 'aId');
+        gl.enableVertexAttribArray(loc);
+        gl.vertexAttribPointer(loc, 1, gl.FLOAT, false, 0, 0);
+        gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE);
+        const uRes = gl.getUniformLocation(program, 'uRes');
+        const uTime = gl.getUniformLocation(program, 'uTime');
+        const uPointer = gl.getUniformLocation(program, 'uPointer');
+        const start = performance.now();
+        function resize() {
+          const dpr = Math.min(devicePixelRatio || 1, 2);
+          canvas.width = Math.max(1, Math.round(canvas.clientWidth * dpr));
+          canvas.height = Math.max(1, Math.round(canvas.clientHeight * dpr));
+          gl.viewport(0, 0, canvas.width, canvas.height);
+        }
+        function frame(now) {
+          requestAnimationFrame(frame);
+          gl.clearColor(0.04, 0.04, 0.05, 1); gl.clear(gl.COLOR_BUFFER_BIT);
+          gl.uniform2f(uRes, canvas.width, canvas.height);
+          gl.uniform1f(uTime, reduce ? 0 : (now - start) / 1000);
+          gl.uniform2f(uPointer, pointer.x, pointer.y);
+          gl.drawArrays(gl.POINTS, 0, count);
+        }
+        addEventListener('resize', resize); resize(); requestAnimationFrame(frame);
+      }
+      function setPointer(event) {
+        const rect = canvas.getBoundingClientRect();
+        pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        pointer.y = -(((event.clientY - rect.top) / rect.height) * 2 - 1);
+      }
+      canvas.addEventListener('pointermove', setPointer);
+      canvas.addEventListener('pointerdown', setPointer);
+      document.getElementById('go').onclick = () => cta('https://thesurok.github.io/portfolio/');
+    </script>
+  </body>
+</html>

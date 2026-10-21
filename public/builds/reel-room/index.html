@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Reel Room</title>
+    <style>
+      :root { color-scheme: dark; }
+      html, body { margin: 0; height: 100%; background: #121318; color: #f2efe8; font-family: "Segoe UI", sans-serif; }
+      body { overflow: hidden; display: grid; place-items: center; }
+      main { width: min(100%, 360px); padding: 16px; display: grid; gap: 12px; }
+      h1 { margin: 0; font-size: 1.4rem; }
+      .reels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; height: 280px; }
+      canvas { width: 100%; height: 100%; background: #0d0e12; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); }
+      .row { display: flex; gap: 8px; }
+      button { min-height: 44px; flex: 1; border-radius: 10px; border: 0; font: inherit; cursor: pointer; }
+      .primary { background: #e2a45c; color: #1b140c; font-weight: 600; }
+      .ghost { background: transparent; color: #f2efe8; border: 1px solid rgba(255,255,255,0.2); }
+      p { margin: 0; color: #a8a297; min-height: 1.4em; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Reel Room</h1>
+      <div class="reels" id="reels"></div>
+      <p id="status">Spin the line.</p>
+      <div class="row">
+        <button class="primary" id="spin" type="button">Spin</button>
+        <button class="ghost" id="go" type="button">Continue</button>
+      </div>
+    </main>
+    <script>
+      function cta(url) {
+        try {
+          if (window.mraid && typeof mraid.open === 'function') return void mraid.open(url);
+          if (window.FbPlayableAd && typeof FbPlayableAd.onCTAClick === 'function') return void FbPlayableAd.onCTAClick();
+          if (window.ExitApi && typeof ExitApi.exit === 'function') ExitApi.exit();
+        } catch (error) {}
+      }
+      const COLORS = ['#e2a45c', '#6cb6a6', '#e07a7a', '#7aa2e3', '#d6c48a'];
+      const reels = [0, 1, 2].map((index) => {
+        const canvas = document.createElement('canvas');
+        canvas.setAttribute('aria-label', 'Reel ' + (index + 1));
+        document.getElementById('reels').append(canvas);
+        return { canvas, ctx: canvas.getContext('2d'), pos: index * 2, vel: 0, stop: 0, spinning: false };
+      });
+      function resize() {
+        for (const reel of reels) {
+          const dpr = Math.min(devicePixelRatio || 1, 2);
+          const rect = reel.canvas.getBoundingClientRect();
+          reel.canvas.width = Math.max(1, Math.round(rect.width * dpr));
+          reel.canvas.height = Math.max(1, Math.round(rect.height * dpr));
+          reel.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+          reel.w = rect.width; reel.h = rect.height;
+        }
+      }
+      function symbol(ctx, id, x, y, s) {
+        ctx.fillStyle = COLORS[id];
+        ctx.beginPath();
+        if (id === 0) ctx.arc(x, y, s * 0.28, 0, Math.PI * 2);
+        else if (id === 1) { ctx.moveTo(x, y - s * 0.3); ctx.lineTo(x + s * 0.28, y + s * 0.24); ctx.lineTo(x - s * 0.28, y + s * 0.24); }
+        else if (id === 2) ctx.rect(x - s * 0.24, y - s * 0.24, s * 0.48, s * 0.48);
+        else if (id === 3) { ctx.moveTo(x, y - s * 0.3); ctx.lineTo(x + s * 0.24, y); ctx.lineTo(x, y + s * 0.3); ctx.lineTo(x - s * 0.24, y); }
+        else ctx.rect(x - s * 0.28, y - s * 0.08, s * 0.56, s * 0.16);
+        ctx.fill();
+      }
+      function draw() {
+        for (const reel of reels) {
+          const ctx = reel.ctx, h = reel.h || 1, step = h / 3;
+          ctx.clearRect(0, 0, reel.w || 1, h);
+          ctx.fillStyle = '#0d0e12'; ctx.fillRect(0, 0, reel.w || 1, h);
+          const base = Math.floor(reel.pos) - 1;
+          const frac = reel.pos - Math.floor(reel.pos);
+          for (let i = 0; i < 5; i++) {
+            const id = ((base + i) % COLORS.length + COLORS.length) % COLORS.length;
+            symbol(ctx, id, (reel.w || 1) / 2, (i - 1 - frac) * step + step / 2 + step, step);
+          }
+          ctx.strokeStyle = 'rgba(226,164,92,0.9)'; ctx.lineWidth = 2;
+          ctx.strokeRect(6, h / 2 - step / 2, (reel.w || 1) - 12, step);
+        }
+      }
+      let last = 0, result = '';
+      function frame(now) {
+        requestAnimationFrame(frame);
+        const dt = Math.min(0.033, last ? (now - last) / 1000 : 0.016);
+        last = now;
+        let spinning = false;
+        for (const reel of reels) {
+          if (reel.vel > 0) {
+            spinning = true;
+            reel.pos += reel.vel * dt;
+            if (now > reel.stop) reel.vel *= Math.pow(0.08, dt);
+            if (reel.vel < 0.35 && now > reel.stop) { reel.vel = 0; reel.pos = Math.round(reel.pos); }
+          }
+        }
+        if (!spinning && reels.some((reel) => reel.spinning)) {
+          reels.forEach((reel) => { reel.spinning = false; });
+          const ids = reels.map((reel) => ((Math.round(reel.pos) % COLORS.length) + COLORS.length) % COLORS.length);
+          result = ids[0] === ids[1] && ids[1] === ids[2] ? 'Line match' : 'No line';
+          document.getElementById('status').textContent = result;
+          document.getElementById('spin').disabled = false;
+        }
+        draw();
+      }
+      addEventListener('resize', resize); resize(); requestAnimationFrame(frame);
+      document.getElementById('spin').onclick = () => {
+        document.getElementById('spin').disabled = true;
+        document.getElementById('status').textContent = 'Spinning';
+        const now = performance.now();
+        reels.forEach((reel, index) => {
+          reel.vel = 16 + Math.random() * 4;
+          reel.stop = now + 700 + index * 420;
+          reel.spinning = true;
+        });
+      };
+      document.getElementById('go').onclick = () => cta('https://thesurok.github.io/portfolio/');
+    </script>
+  </body>
+</html>

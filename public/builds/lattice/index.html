@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Lattice</title>
+    <style>
+      :root { color-scheme: dark; }
+      html, body { margin: 0; height: 100%; background: #121318; color: #f2efe8; font-family: "Segoe UI", sans-serif; }
+      body { overflow: hidden; }
+      canvas { width: 100%; height: 100%; display: block; touch-action: none; }
+      button { min-height: 44px; border-radius: 10px; border: 0; padding: 0 14px; font: inherit; cursor: pointer; }
+      .primary { background: #e2a45c; color: #1b140c; font-weight: 600; }
+      .ghost { background: transparent; color: #f2efe8; border: 1px solid rgba(255, 255, 255, 0.2); }
+      #start { position: fixed; inset: 0; display: grid; place-items: center; background: rgba(0, 0, 0, 0.4); color: inherit; font-size: 1.1rem; font-weight: 600; }
+      #start[hidden] { display: none; }
+      .bar { position: fixed; left: 12px; right: 12px; bottom: 12px; display: none; gap: 8px; align-items: center; padding: 10px; border-radius: 14px; background: rgba(20, 22, 28, 0.94); border: 1px solid rgba(255, 255, 255, 0.12); }
+      .bar.show { display: flex; }
+    </style>
+  </head>
+  <body>
+    <canvas id="c" aria-label="Match-3 board"></canvas>
+    <button id="start" type="button">Tap to start</button>
+    <div class="bar" id="end">
+      <span>Board cleared</span>
+      <button class="ghost" id="retry" type="button">Retry</button>
+      <button class="primary" id="go" type="button">Continue</button>
+    </div>
+    <script>
+      function cta(url) {
+        try {
+          if (window.mraid && typeof mraid.open === 'function') return void mraid.open(url);
+          if (window.FbPlayableAd && typeof FbPlayableAd.onCTAClick === 'function') return void FbPlayableAd.onCTAClick();
+          if (window.ExitApi && typeof ExitApi.exit === 'function') ExitApi.exit();
+        } catch (error) {}
+      }
+      const canvas = document.getElementById('c');
+      const ctx = canvas.getContext('2d');
+      const COLS = 7, ROWS = 8;
+      const COLORS = ['#e2a45c', '#6cb6a6', '#e07a7a', '#7aa2e3', '#d6c48a', '#c58be0'];
+      let grid = [], cell = 40, ox = 0, oy = 0, W = 1, H = 1, score = 0, moves = 0, selected = null, busy = false, started = false;
+      const rand = (n) => Math.floor(Math.random() * n);
+      const gem = (color, c, r, y) => ({ color, c, r, y: y == null ? r : y, scale: 1, dying: false });
+      const colorAt = (r, c) => grid[r] && grid[r][c] && grid[r][c].color;
+      function resize() {
+        const dpr = Math.min(devicePixelRatio || 1, 2);
+        W = canvas.clientWidth; H = canvas.clientHeight;
+        canvas.width = Math.max(1, Math.round(W * dpr));
+        canvas.height = Math.max(1, Math.round(H * dpr));
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        cell = Math.floor(Math.min((W - 24) / COLS, (H - 150) / ROWS));
+        ox = (W - cell * COLS) / 2;
+        oy = 64;
+      }
+      function findMatches() {
+        const set = new Set();
+        for (let r = 0; r < ROWS; r++) {
+          let run = 1;
+          for (let c = 1; c <= COLS; c++) {
+            if (c < COLS && colorAt(r, c) && colorAt(r, c) === colorAt(r, c - 1)) run++;
+            else { if (run >= 3) for (let k = 0; k < run; k++) set.add(r + ':' + (c - 1 - k)); run = 1; }
+          }
+        }
+        for (let c = 0; c < COLS; c++) {
+          let run = 1;
+          for (let r = 1; r <= ROWS; r++) {
+            if (r < ROWS && colorAt(r, c) && colorAt(r, c) === colorAt(r - 1, c)) run++;
+            else { if (run >= 3) for (let k = 0; k < run; k++) set.add(r - 1 - k + ':' + c); run = 1; }
+          }
+        }
+        return set;
+      }
+      function fill() {
+        grid = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
+        for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+          let color = COLORS[rand(COLORS.length)], guard = 0;
+          while (guard++ < 8 && ((c >= 2 && color === colorAt(r, c - 1) && color === colorAt(r, c - 2)) || (r >= 2 && color === colorAt(r - 1, c) && color === colorAt(r - 2, c)))) color = COLORS[rand(COLORS.length)];
+          grid[r][c] = gem(color, c, r);
+        }
+      }
+      function swap(a, b) {
+        const A = grid[a.r][a.c], B = grid[b.r][b.c];
+        grid[a.r][a.c] = B; grid[b.r][b.c] = A;
+        A.c = b.c; A.r = b.r; B.c = a.c; B.r = a.r;
+      }
+      function collapse() {
+        for (let c = 0; c < COLS; c++) {
+          const kept = [];
+          for (let r = ROWS - 1; r >= 0; r--) if (grid[r][c] && !grid[r][c].dying) kept.push(grid[r][c]);
+          const missing = ROWS - kept.length;
+          for (let i = 0; i < missing; i++) kept.push(gem(COLORS[rand(COLORS.length)], c, 0, -i - 1));
+          for (let r = ROWS - 1; r >= 0; r--) {
+            const g = kept[ROWS - 1 - r];
+            g.r = r; g.c = c; g.dying = false; g.scale = 1;
+            grid[r][c] = g;
+          }
+        }
+      }
+      function resolve() {
+        const matches = findMatches();
+        if (!matches.size) {
+          busy = false;
+          if (moves >= 12) document.getElementById('end').classList.add('show');
+          return;
+        }
+        score += matches.size * 10;
+        matches.forEach((key) => { const [r, c] = key.split(':').map(Number); grid[r][c].dying = true; });
+        setTimeout(() => { collapse(); setTimeout(resolve, 180); }, 140);
+      }
+      function trySwap(a, b) {
+        if (Math.abs(a.r - b.r) + Math.abs(a.c - b.c) !== 1) return;
+        busy = true; moves++; swap(a, b);
+        setTimeout(() => { if (!findMatches().size) { swap(a, b); busy = false; } else resolve(); }, 140);
+      }
+      canvas.addEventListener('pointerdown', (event) => {
+        if (!started || busy || cell <= 0) return;
+        const rect = canvas.getBoundingClientRect();
+        const c = Math.floor((event.clientX - rect.left - ox) / cell);
+        const r = Math.floor((event.clientY - rect.top - oy) / cell);
+        if (c < 0 || r < 0 || c >= COLS || r >= ROWS) { selected = null; return; }
+        const hit = { c, r };
+        if (!selected) { selected = hit; return; }
+        if (selected.c === hit.c && selected.r === hit.r) { selected = null; return; }
+        const from = selected; selected = null; trySwap(from, hit);
+      });
+      function loop() {
+        requestAnimationFrame(loop);
+        for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+          const g = grid[r][c]; if (!g) continue;
+          g.y += (g.r - g.y) * 0.28;
+          if (Math.abs(g.y - g.r) < 0.01) g.y = g.r;
+          if (g.dying) g.scale += (0.2 - g.scale) * 0.3;
+        }
+        ctx.clearRect(0, 0, W, H);
+        ctx.fillStyle = '#121318'; ctx.fillRect(0, 0, W, H);
+        ctx.fillStyle = '#f2efe8'; ctx.font = '600 20px Segoe UI, sans-serif'; ctx.fillText('Lattice', 16, 32);
+        ctx.fillStyle = '#a8a297'; ctx.font = '14px Segoe UI, sans-serif'; ctx.fillText(score + '   ' + moves + '/12', 16, 52);
+        if (!started) return;
+        for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+          const g = grid[r][c];
+          const x = ox + g.c * cell + cell / 2, y = oy + g.y * cell + cell / 2;
+          ctx.globalAlpha = g.dying ? 0.35 : 1; ctx.fillStyle = g.color;
+          ctx.beginPath(); ctx.arc(x, y, cell * 0.32 * g.scale, 0, Math.PI * 2); ctx.fill(); ctx.globalAlpha = 1;
+          if (selected && selected.c === g.c && selected.r === g.r) { ctx.strokeStyle = '#f2efe8'; ctx.lineWidth = 2; ctx.stroke(); }
+        }
+      }
+      addEventListener('resize', resize); resize(); fill(); requestAnimationFrame(loop);
+      document.getElementById('start').onclick = () => { started = true; document.getElementById('start').hidden = true; };
+      document.getElementById('retry').onclick = () => { score = 0; moves = 0; selected = null; busy = false; document.getElementById('end').classList.remove('show'); fill(); };
+      document.getElementById('go').onclick = () => cta('https://thesurok.github.io/portfolio/');
+    </script>
+  </body>
+</html>

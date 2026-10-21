@@ -1,0 +1,93 @@
+---
+import { Picture } from 'astro:assets';
+import type { CollectionEntry } from 'astro:content';
+import { projectHref, withBase } from '../lib/paths';
+import { tagLabel, techLabels } from '../data/site';
+
+interface Props {
+  project: CollectionEntry<'projects'>;
+  eager?: boolean;
+}
+
+const { project, eager = false } = Astro.props;
+const href = projectHref(project.data.slug);
+const videoSrc = project.data.video
+  ? /^https?:/.test(project.data.video)
+    ? project.data.video
+    : withBase(project.data.video)
+  : undefined;
+---
+
+<article
+  class="project-card"
+  data-project
+  data-tech={project.data.tech.join(' ')}
+  data-tags={project.data.tags.join(' ')}
+>
+  <a class="card-link" href={href}>
+    <div class="media">
+      <Picture
+        src={project.data.poster}
+        alt=""
+        widths={[480, 800, 1200]}
+        sizes="(max-width: 700px) 100vw, 360px"
+        formats={['avif', 'webp']}
+        loading={eager ? 'eager' : 'lazy'}
+        decoding="async"
+      />
+      {
+        videoSrc && (
+          <video class="preview" muted loop playsinline preload="none">
+            <source src={videoSrc} type={videoSrc.endsWith('.webm') ? 'video/webm' : 'video/mp4'} />
+          </video>
+        )
+      }
+    </div>
+    <div class="card-body">
+      <p class="card-meta">{project.data.year}</p>
+      <h3>{project.data.title}</h3>
+      <p class="summary">{project.data.summary}</p>
+      <ul class="tag-list">
+        {
+          project.data.tags.map((tag) => (
+            <li class="tag">{tagLabel(tag)}</li>
+          ))
+        }
+        {
+          project.data.tech.map((item) => (
+            <li class="tag">{techLabels[item]}</li>
+          ))
+        }
+      </ul>
+    </div>
+  </a>
+</article>
+
+<script>
+  const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+  function bindPreviews() {
+    document.querySelectorAll<HTMLElement>('[data-project]').forEach((card) => {
+      if (card.dataset.previewBound === 'true') return;
+      const video = card.querySelector('video');
+      if (!video || motion.matches) return;
+      card.dataset.previewBound = 'true';
+      const start = () => {
+        void video.play().catch(() => undefined);
+      };
+      const stop = () => {
+        video.pause();
+        video.currentTime = 0;
+      };
+      card.addEventListener('pointerenter', start);
+      card.addEventListener('pointerleave', stop);
+      card.addEventListener('focusin', start);
+      card.addEventListener('focusout', (event) => {
+        if (!card.contains(event.relatedTarget as Node | null)) stop();
+      });
+    });
+  }
+
+  document.addEventListener('astro:page-load', bindPreviews);
+  bindPreviews();
+</script>

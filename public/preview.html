@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Build preview</title>
+    <style>
+      :root { color-scheme: dark; }
+      html, body { margin: 0; height: 100%; background: #101114; color: #f2efe8; font-family: "Segoe UI", sans-serif; }
+      body { display: grid; place-items: center; }
+    </style>
+  </head>
+  <body>
+    <p id="status">Loading build</p>
+    <script>
+      const slug = new URLSearchParams(location.search).get('build') || '';
+      const status = document.getElementById('status');
+      if (!/^[a-z0-9-]+$/.test(slug)) {
+        status.textContent = 'Missing build.';
+      } else {
+        const buildUrl = new URL('builds/' + slug + '/index.html', location.href);
+        fetch(buildUrl.href)
+          .then((response) => {
+            if (!response.ok) throw new Error(String(response.status));
+            return response.text();
+          })
+          .then((html) => {
+            const shim = new URL('mraid-shim.js', location.href).href;
+            const base = new URL('builds/' + slug + '/', location.href).href;
+            const injection = '<base href="' + base + '"><script src="' + shim + '"><\/script>';
+            if (/<head[^>]*>/i.test(html)) html = html.replace(/<head[^>]*>/i, (match) => match + injection);
+            else html = '<!DOCTYPE html><html><head>' + injection + '</head><body>' + html + '</body></html>';
+            document.open();
+            document.write(html);
+            document.close();
+          })
+          .catch(() => {
+            status.textContent = 'This build did not load.';
+          });
+      }
+    </script>
+  </body>
+</html>

@@ -1,8 +1,10 @@
 {
-  "name": "portfoliowebsite",
+  "name": "portfolio",
   "version": "1.0.0",
-  "description": "personal portfolio",
-  "homepage": "https://github.com/thesurok/portfolio#readme",
+  "private": true,
+  "type": "module",
+  "description": "Portfolio of Oleh Novytskyi, an interactive / HTML5 game developer.",
+  "homepage": "https://thesurok.github.io/portfolio/",
   "bugs": {
     "url": "https://github.com/thesurok/portfolio/issues"
   },
@@ -11,10 +13,38 @@
     "url": "git+https://github.com/thesurok/portfolio.git"
   },
   "license": "ISC",
-  "author": "novytskyi oleh",
-  "type": "commonjs",
-  "main": "index.js",
+  "author": "Oleh Novytskyi",
+  "engines": {
+    "node": ">=22.22.0"
+  },
   "scripts": {
-    "test": "test"
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "build:shim": "node scripts/build-shim.mjs",
+    "prebuild": "npm run build:shim",
+    "predev": "npm run build:shim",
+    "add-project": "node scripts/add-project.mjs",
+    "generate:assets": "node scripts/generate-assets.mjs"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
+    "astro": "^7.4.1"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.11",
+    "@types/node": "^26.6.5",
+    "esbuild": "^0.28.2",
+    "eslint": "^10.13.0",
+    "eslint-plugin-astro": "^1.7.0",
+    "prettier": "^3.9.10",
+    "prettier-plugin-astro": "^1.1.1",
+    "sharp": "^0.35.5",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.72.0"
   }
 }
