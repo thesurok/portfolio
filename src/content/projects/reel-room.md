@@ -11,6 +11,7 @@ tech:
 tags:
   - casino-style
 featured: false
+published: false
 order: 4
 build:
   path: builds/reel-room/index.html
@@ -25,8 +26,8 @@ highlights:
 challenges:
   - problem: A linear spin reads as a blur, not a reel.
     solution: Each reel eases out on its own clock so the stops land in sequence.
-  - problem: Symbol art from a client often cannot be shown.
-    solution: The study uses geometric symbols so the timing can be reviewed without the original assets.
+  - problem: Branded symbol art cannot be shown with the mechanic.
+    solution: The study uses geometric symbols so the timing can be reviewed on its own.
 ---
 
 Production reels of this kind sit in PixiJS, with GSAP or Spine on the symbols. This build is the mechanic only: spin, ease, stop, check the line.

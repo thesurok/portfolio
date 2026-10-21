@@ -10,6 +10,7 @@ tech:
 tags:
   - 3d
 featured: true
+published: false
 order: 6
 build:
   path: builds/signal-bloom/index.html

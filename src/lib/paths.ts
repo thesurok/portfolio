@@ -18,6 +18,12 @@ export function sortProjects<T extends { data: { order: number; title: string } 
   );
 }
 
+export function visibleProjects<T extends { data: { order: number; title: string; published: boolean } }>(
+  projects: T[],
+): T[] {
+  return sortProjects(projects.filter((project) => project.data.published));
+}
+
 export function isActive(pathname: string, href: string): boolean {
   const clean = (value: string) => {
     const path = value.split('#')[0]?.split('?')[0] ?? '';

@@ -51,18 +51,7 @@
   document.addEventListener('astro:page-load', bootTheme);
   document.addEventListener('astro:after-swap', () => {
     const stored = localStorage.getItem(storageKey);
-    const theme =
-      stored === 'light' || stored === 'dark'
-        ? stored
-        : window.matchMedia('(prefers-color-scheme: light)').matches
-          ? 'light'
-          : 'dark';
-    applyTheme(theme, false);
+    applyTheme(stored === 'light' ? 'light' : 'dark', false);
   });
   bootTheme();
-
-  const media = window.matchMedia('(prefers-color-scheme: light)');
-  media.addEventListener('change', (event) => {
-    if (!localStorage.getItem(storageKey)) applyTheme(event.matches ? 'light' : 'dark', false);
-  });
 </script>

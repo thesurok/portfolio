@@ -9,10 +9,12 @@ import { buildSizeKB } from '../../lib/build-size';
 
 export async function getStaticPaths() {
   const projects = await getCollection('projects');
-  return projects.map((project) => ({
-    params: { slug: project.data.slug },
-    props: { project },
-  }));
+  return projects
+    .filter((project) => project.data.published)
+    .map((project) => ({
+      params: { slug: project.data.slug },
+      props: { project },
+    }));
 }
 
 const { project } = Astro.props;
@@ -44,10 +46,7 @@ const creativeWork = {
 >
   <div class="wrap">
     <header class="page-head">
-      <p class="eyebrow">
-        {project.data.year}
-        {project.data.client ? ` · ${project.data.client}` : ''}
-      </p>
+      <p class="eyebrow">{project.data.year}</p>
       <h1>{project.data.title}</h1>
       <ul class="tag-list">
         {project.data.tags.map((tag) => <li class="tag">{tagLabel(tag)}</li>)}

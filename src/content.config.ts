@@ -16,6 +16,7 @@ const projects = defineCollection({
       tech: z.array(tech).min(1),
       tags: z.array(z.string().regex(/^[a-z0-9-]+$/)).min(1),
       featured: z.boolean().default(false),
+      published: z.boolean().default(true),
       order: z.number().int().default(0),
       build: z.object({
         path: z.string(),
@@ -26,7 +27,6 @@ const projects = defineCollection({
       }),
       poster: image(),
       video: z.string().optional(),
-      client: z.string().optional(),
       highlights: z.array(z.string()).default([]),
       challenges: z
         .array(

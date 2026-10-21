@@ -4,17 +4,19 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import ContactList from '../components/ContactList.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import { site, skills } from '../data/site';
-import { sortProjects, withBase } from '../lib/paths';
+import { visibleProjects, withBase } from '../lib/paths';
 
-const projects = sortProjects(await getCollection('projects'));
+const projects = visibleProjects(await getCollection('projects'));
 const featured = projects.filter((project) => project.data.featured);
 const slots = projects.filter((project) => project.data.tags.includes('casino-style'));
+const showHeroWidget = false;
 ---
 
 <BaseLayout title={`${site.name} — HTML5 Game Developer`} description={site.pitch} ogAlt={site.pitch}>
   <div class="wrap">
     <section class="hero">
-      <div>
+      <canvas class="hero-bg" data-hero-field data-hero-variant="background" aria-hidden="true"></canvas>
+      <div class="hero-copy">
         <p class="eyebrow">{site.role}</p>
         <h1>{site.name}</h1>
         <p class="pitch">{site.pitch}</p>
@@ -23,9 +25,13 @@ const slots = projects.filter((project) => project.data.tags.includes('casino-st
           <a class="btn btn-ghost" href="#contact">Contact</a>
         </div>
       </div>
-      <div class="hero-visual" aria-hidden="true">
-        <canvas id="hero-field"></canvas>
-      </div>
+      {
+        showHeroWidget && (
+          <div class="hero-visual" aria-hidden="true">
+            <canvas data-hero-field data-hero-variant="widget"></canvas>
+          </div>
+        )
+      }
     </section>
 
     <section class="section" aria-labelledby="featured-title">
@@ -38,22 +44,23 @@ const slots = projects.filter((project) => project.data.tags.includes('casino-st
       </div>
     </section>
 
-    <section class="section" aria-labelledby="slots-title">
-      <div class="section-head">
-        <div>
-          <h2 id="slots-title">Slots / Casino concepts</h2>
-          <p>Reel and spin studies. More demos will land here.</p>
-        </div>
-      </div>
-      <div class="project-grid">
-        {slots.map((project) => <ProjectCard project={project} />)}
-        <article class="placeholder-card">
-          <p class="eyebrow">In progress</p>
-          <h3>Next concept</h3>
-          <p>A slots demo will be added here.</p>
-        </article>
-      </div>
-    </section>
+    {
+      slots.length > 0 && (
+        <section class="section" aria-labelledby="slots-title">
+          <div class="section-head">
+            <div>
+              <h2 id="slots-title">Slots / Casino concepts</h2>
+              <p>Reel and spin studies.</p>
+            </div>
+          </div>
+          <div class="project-grid">
+            {slots.map((project) => (
+              <ProjectCard project={project} />
+            ))}
+          </div>
+        </section>
+      )
+    }
 
     <section class="section" aria-labelledby="skills-title">
       <div class="section-head">
@@ -85,13 +92,13 @@ const slots = projects.filter((project) => project.data.tags.includes('casino-st
 <script>
   import { mountHero } from '../scripts/hero';
 
-  let stop: () => void = () => undefined;
+  let stops: Array<() => void> = [];
 
   function bootHero() {
-    stop();
-    stop = () => undefined;
-    const canvas = document.querySelector<HTMLCanvasElement>('#hero-field');
-    if (canvas) stop = mountHero(canvas);
+    stops.forEach((stop) => stop());
+    stops = [...document.querySelectorAll<HTMLCanvasElement>('[data-hero-field]')].map((canvas) =>
+      mountHero(canvas, canvas.dataset.heroVariant === 'background' ? 'background' : 'widget'),
+    );
   }
 
   document.addEventListener('astro:page-load', bootHero);

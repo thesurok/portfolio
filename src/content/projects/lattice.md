@@ -11,6 +11,7 @@ tags:
   - match-3
   - puzzle
 featured: true
+published: false
 order: 1
 build:
   path: builds/lattice/index.html

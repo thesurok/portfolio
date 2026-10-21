@@ -189,10 +189,14 @@ window.addEventListener('message', (event: MessageEvent) => {
   if (data.source === 'portfolio-player' && data.type === 'mute') applyMute(Boolean(data.muted));
 });
 
-window.setTimeout(() => {
+function markReady(): void {
+  if (state === 'default') return;
   state = 'default';
   dispatch('ready');
   dispatch('viewableChange');
-}, 0);
+}
+
+if (document.readyState === 'complete') markReady();
+else window.addEventListener('load', markReady, { once: true });
 
 export {};

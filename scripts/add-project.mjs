@@ -36,6 +36,7 @@ tech:
 tags:
   - puzzle
 featured: false
+published: false
 order: 50
 build:
   path: builds/${slug}/index.html

@@ -9,6 +9,7 @@ tech:
 tags:
   - puzzle
 featured: false
+published: false
 order: 7
 build:
   path: builds/fold/index.html

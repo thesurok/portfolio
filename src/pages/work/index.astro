@@ -4,17 +4,16 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import FilterBar from '../../components/FilterBar.astro';
 import ProjectCard from '../../components/ProjectCard.astro';
 import { site, tagLabel, techLabels } from '../../data/site';
-import { sortProjects } from '../../lib/paths';
+import { visibleProjects } from '../../lib/paths';
 
-const projects = sortProjects(await getCollection('projects'));
+const projects = visibleProjects(await getCollection('projects'));
 const tech = (['pixi', 'three'] as const)
   .filter((id) => projects.some((project) => project.data.tech.includes(id)))
   .map((id) => ({ id, label: techLabels[id] }));
 const tags = [...new Set(projects.flatMap((project) => project.data.tags))]
   .sort()
   .map((id) => ({ id, label: tagLabel(id) }));
-const description =
-  'Interactive builds and mechanic studies: puzzle, match-3, runner, physics, 3D, and casino-style.';
+const description = 'Playable ads and interactive HTML5 builds.';
 ---
 
 <BaseLayout title={`Work — ${site.name}`} description={description}>
@@ -22,8 +21,7 @@ const description =
     <header class="page-head">
       <h1>Work</h1>
       <p class="lede">
-        HTML5 games and interactive builds, tagged by genre and mechanic. Client names stay off the
-        page unless a project is cleared to show.
+        HTML5 games and interactive builds, tagged by genre and mechanic.
       </p>
     </header>
     <FilterBar tech={tech} tags={tags} />

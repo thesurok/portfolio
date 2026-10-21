@@ -65,7 +65,7 @@ const path = Astro.url.pathname;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -74,12 +74,7 @@ const path = Astro.url.pathname;
       (() => {
         try {
           const stored = localStorage.getItem('theme');
-          const theme =
-            stored === 'light' || stored === 'dark'
-              ? stored
-              : matchMedia('(prefers-color-scheme: light)').matches
-                ? 'light'
-                : 'dark';
+          const theme = stored === 'light' ? 'light' : 'dark';
           document.documentElement.dataset.theme = theme;
           const meta = document.querySelector('meta[name="theme-color"]');
           if (meta) meta.setAttribute('content', theme === 'light' ? '#f3f1eb' : '#101114');

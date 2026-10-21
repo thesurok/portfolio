@@ -10,6 +10,7 @@ tech:
 tags:
   - 3d
 featured: true
+published: false
 order: 3
 build:
   path: builds/orbit-glass/index.html

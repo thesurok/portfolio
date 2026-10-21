@@ -52,6 +52,7 @@ export function tagLabel(tag: string): string {
     '3d': '3D',
     'match-3': 'Match-3',
     'casino-style': 'Casino-style',
+    playable: 'Playable ad',
   };
   return custom[tag] ?? tag.charAt(0).toUpperCase() + tag.slice(1);
 }

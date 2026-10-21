@@ -6,7 +6,26 @@ interface Particle {
   r: number;
 }
 
-export function mountHero(canvas: HTMLCanvasElement): () => void {
+type HeroVariant = 'background' | 'widget';
+
+const LINK = 120;
+const FRAME_MS = 1000 / 60;
+
+function particle(): Particle {
+  return {
+    x: Math.random(),
+    y: Math.random(),
+    vx: (Math.random() - 0.5) * 0.00018,
+    vy: (Math.random() - 0.5) * 0.00018,
+    r: 1.2 + Math.random() * 1.8,
+  };
+}
+
+function countFor(width: number, height: number): number {
+  return Math.max(20, Math.min(80, Math.round((width * height) / 4500)));
+}
+
+export function mountHero(canvas: HTMLCanvasElement, variant: HeroVariant = 'widget'): () => void {
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const saveData = (navigator as Navigator & { connection?: { saveData?: boolean } }).connection
     ?.saveData;
@@ -15,15 +34,10 @@ export function mountHero(canvas: HTMLCanvasElement): () => void {
   const context = canvas.getContext('2d');
   if (!context) return () => undefined;
 
-  const particles: Particle[] = Array.from({ length: 36 }, () => ({
-    x: Math.random(),
-    y: Math.random(),
-    vx: (Math.random() - 0.5) * 0.00018,
-    vy: (Math.random() - 0.5) * 0.00018,
-    r: 1.2 + Math.random() * 1.8,
-  }));
-
+  const strength = variant === 'background' ? 0.42 : 1;
+  const particles: Particle[] = [];
   let frame = 0;
+  let last = 0;
   let running = true;
   let visible = true;
 
@@ -33,23 +47,36 @@ export function mountHero(canvas: HTMLCanvasElement): () => void {
     canvas.width = Math.max(1, Math.round(rect.width * ratio));
     canvas.height = Math.max(1, Math.round(rect.height * ratio));
     context.setTransform(ratio, 0, 0, ratio, 0, 0);
+    if (rect.width < 2 || rect.height < 2) return;
+    const next = countFor(rect.width, rect.height);
+    while (particles.length < next) particles.push(particle());
+    if (particles.length > next) particles.length = next;
   };
 
-  const draw = () => {
+  const draw = (time: number) => {
     if (!running) return;
     frame = window.requestAnimationFrame(draw);
-    if (!visible || document.hidden) return;
+    if (!visible || document.hidden) {
+      last = 0;
+      return;
+    }
+    const step = (last === 0 ? FRAME_MS : Math.min(time - last, 50)) / FRAME_MS;
+    last = time;
     const rect = canvas.getBoundingClientRect();
     const width = rect.width;
     const height = rect.height;
+    const style = getComputedStyle(canvas);
+    const line = style.getPropertyValue('--accent').trim() || '#e2a45c';
+    const dot = style.getPropertyValue('--text').trim() || '#f2efe8';
     context.clearRect(0, 0, width, height);
-    for (const particle of particles) {
-      particle.x += particle.vx;
-      particle.y += particle.vy;
-      if (particle.x < 0 || particle.x > 1) particle.vx *= -1;
-      if (particle.y < 0 || particle.y > 1) particle.vy *= -1;
+    for (const item of particles) {
+      item.x += item.vx * step;
+      item.y += item.vy * step;
+      if (item.x < 0 || item.x > 1) item.vx *= -1;
+      if (item.y < 0 || item.y > 1) item.vy *= -1;
     }
     context.lineWidth = 1;
+    context.strokeStyle = line;
     for (let i = 0; i < particles.length; i += 1) {
       const a = particles[i];
       if (!a) continue;
@@ -59,8 +86,8 @@ export function mountHero(canvas: HTMLCanvasElement): () => void {
         const dx = (a.x - b.x) * width;
         const dy = (a.y - b.y) * height;
         const distance = Math.hypot(dx, dy);
-        if (distance < 120) {
-          context.strokeStyle = `rgba(226, 164, 92, ${0.28 * (1 - distance / 120)})`;
+        if (distance < LINK) {
+          context.globalAlpha = strength * 0.28 * (1 - distance / LINK);
           context.beginPath();
           context.moveTo(a.x * width, a.y * height);
           context.lineTo(b.x * width, b.y * height);
@@ -68,12 +95,14 @@ export function mountHero(canvas: HTMLCanvasElement): () => void {
         }
       }
     }
-    for (const particle of particles) {
-      context.fillStyle = 'rgba(242, 239, 232, 0.85)';
+    context.fillStyle = dot;
+    for (const item of particles) {
+      context.globalAlpha = strength * 0.85;
       context.beginPath();
-      context.arc(particle.x * width, particle.y * height, particle.r, 0, Math.PI * 2);
+      context.arc(item.x * width, item.y * height, item.r, 0, Math.PI * 2);
       context.fill();
     }
+    context.globalAlpha = 1;
   };
 
   const observer = new IntersectionObserver(([entry]) => {

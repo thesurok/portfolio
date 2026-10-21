@@ -10,6 +10,7 @@ tags:
   - physics
   - puzzle
 featured: true
+published: false
 order: 5
 build:
   path: builds/kinetic-stack/index.html
