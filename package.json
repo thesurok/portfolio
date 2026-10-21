@@ -1,0 +1,20 @@
+{
+  "name": "portfoliowebsite",
+  "version": "1.0.0",
+  "description": "personal portfolio",
+  "homepage": "https://github.com/thesurok/portfolio#readme",
+  "bugs": {
+    "url": "https://github.com/thesurok/portfolio/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/thesurok/portfolio.git"
+  },
+  "license": "ISC",
+  "author": "novytskyi oleh",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  }
+}
