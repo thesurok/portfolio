@@ -1,6 +1,6 @@
 {
   "name": "portfolio",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "type": "module",
   "description": "Portfolio of Oleh Novytskyi, a senior JavaScript game engineer.",
@@ -29,7 +29,8 @@
     "prebuild": "npm run build:shim",
     "predev": "npm run build:shim",
     "add-project": "node scripts/add-project.mjs",
-    "generate:assets": "node scripts/generate-assets.mjs"
+    "generate:assets": "node scripts/generate-assets.mjs",
+    "prepare": "node scripts/install-git-hooks.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",

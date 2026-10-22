@@ -22,6 +22,7 @@ function builtAt(): string {
 }
 
 // Baked in at build time so a deploy can be checked against the footer.
+// The patch number is raised by scripts/bump-version.mjs on each commit.
 export const siteVersion = import.meta.env.PROD
   ? `${version} · ${revision()} · ${builtAt()}`
   : 'dev';
