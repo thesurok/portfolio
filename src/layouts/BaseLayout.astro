@@ -6,6 +6,7 @@ import ContactList from '../components/ContactList.astro';
 import ThemeToggle from '../components/ThemeToggle.astro';
 import { site } from '../data/site';
 import { isActive, withBase } from '../lib/paths';
+import { siteVersion } from '../lib/version';
 
 interface Props {
   title: string;
@@ -131,7 +132,10 @@ const path = Astro.url.pathname;
     </main>
     <footer class="site-footer">
       <div class="wrap footer-bar">
-        <p>{site.name} · {site.role}</p>
+        <div class="footer-id">
+          <p>{site.name} · {site.role}</p>
+          <p class="build-version">Version {siteVersion}</p>
+        </div>
         <ContactList />
       </div>
     </footer>

@@ -662,9 +662,20 @@ main {
   align-items: center;
 }
 
+.footer-id {
+  display: grid;
+  gap: 2px;
+}
+
 .footer-bar p,
 .location {
   color: var(--muted);
+}
+
+.build-version {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
 }
 
 .not-found {
