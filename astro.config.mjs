@@ -7,6 +7,13 @@ export default defineConfig({
   output: 'static',
   trailingSlash: 'always',
   integrations: [sitemap()],
+  // One stylesheet for every page. Split CSS chunks are emitted but not linked
+  // into the static HTML with the current Vite/Rolldown build.
+  vite: {
+    build: {
+      cssCodeSplit: false,
+    },
+  },
   fonts: [
     {
       provider: fontProviders.fontsource(),

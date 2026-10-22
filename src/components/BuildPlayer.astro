@@ -8,18 +8,15 @@ import '../styles/player.css';
 interface Props {
   slug: string;
   title: string;
-  buildPath: string;
   orientation: 'portrait' | 'landscape' | 'both';
   poster: ImageMetadata;
   video?: string;
 }
 
-const { slug, title, buildPath, orientation, poster, video } = Astro.props;
+const { slug, title, orientation, poster, video } = Astro.props;
 const landscape = orientation === 'landscape';
 const width = landscape ? 844 : 390;
 const height = landscape ? 390 : 844;
-const src = withBase(buildPath);
-const shim = withBase('mraid-shim.js');
 const preview = withBase(`preview.html?build=${encodeURIComponent(slug)}`);
 const videoSrc = video ? withBase(video) : undefined;
 ---
@@ -28,8 +25,7 @@ const videoSrc = video ? withBase(video) : undefined;
   class="player"
   id={`player-${slug}`}
   data-build-player
-  data-src={src}
-  data-shim={shim}
+  data-preview={preview}
   data-orientation={orientation}
   data-title={`${title} build`}
   style={`--w:${width};--h:${height};--bezel:12px;`}

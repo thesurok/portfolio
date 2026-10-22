@@ -16,8 +16,14 @@
     <script>
       const slug = new URLSearchParams(location.search).get('build') || '';
       const status = document.getElementById('status');
+      const notifyParent = (type) => {
+        if (parent && parent !== window) {
+          parent.postMessage({ source: 'portfolio-preview', type: type }, location.origin);
+        }
+      };
       if (!/^[a-z0-9-]+$/.test(slug)) {
         status.textContent = 'Missing build.';
+        notifyParent('error');
       } else {
         const buildUrl = new URL('builds/' + slug + '/index.html', location.href);
         fetch(buildUrl.href)
@@ -26,9 +32,17 @@
             return response.text();
           })
           .then((html) => {
+            if (!html.trim()) throw new Error('empty');
             const shim = new URL('mraid-shim.js', location.href).href;
             const base = new URL('builds/' + slug + '/', location.href).href;
-            const injection = '<base href="' + base + '"><script src="' + shim + '"><\/script>';
+            const origin = JSON.stringify(location.origin);
+            const injection =
+              '<script>window.__portfolioParentOrigin=' + origin + ';' +
+              'window.addEventListener("load",function(){' +
+              'if(parent&&parent!==window)parent.postMessage({source:"portfolio-preview",type:"ready"},window.__portfolioParentOrigin);' +
+              '});<\/script>' +
+              '<base href="' + base + '">' +
+              '<script src="' + shim + '"><\/script>';
             if (/<head[^>]*>/i.test(html)) html = html.replace(/<head[^>]*>/i, (match) => match + injection);
             else html = '<!DOCTYPE html><html><head>' + injection + '</head><body>' + html + '</body></html>';
             document.open();
@@ -37,6 +51,7 @@
           })
           .catch(() => {
             status.textContent = 'This build did not load.';
+            notifyParent('error');
           });
       }
     </script>

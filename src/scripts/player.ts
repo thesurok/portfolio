@@ -66,14 +66,13 @@ function initPlayer(root: HTMLElement): void {
   const muteButton = root.querySelector<HTMLButtonElement>('[data-mute]');
   if (!playButton || !loader || !fallback || !screen || !status || !toast) return;
 
-  const src = root.dataset.src ?? '';
-  const shim = root.dataset.shim ?? '';
+  const preview = root.dataset.preview ?? '';
   let preset: 'phone' | 'tablet' = 'phone';
   let landscape = root.dataset.orientation === 'landscape';
   let iframe: HTMLIFrameElement | null = null;
-  let abort: AbortController | null = null;
   let muted = false;
   let toastTimer = 0;
+  let loadTimer = 0;
 
   const setStatus = (message: string) => {
     status.textContent = message;
@@ -105,8 +104,7 @@ function initPlayer(root: HTMLElement): void {
   };
 
   const unload = (keepOverlay = false) => {
-    abort?.abort();
-    abort = null;
+    window.clearTimeout(loadTimer);
     iframe?.remove();
     iframe = null;
     muted = false;
@@ -124,6 +122,7 @@ function initPlayer(root: HTMLElement): void {
   };
 
   const showError = () => {
+    window.clearTimeout(loadTimer);
     iframe?.remove();
     iframe = null;
     loader.hidden = true;
@@ -133,8 +132,17 @@ function initPlayer(root: HTMLElement): void {
     setStatus('Build failed to load');
   };
 
-  const mount = async () => {
-    if (!src || !shim || !screen) return;
+  const markReady = () => {
+    window.clearTimeout(loadTimer);
+    if (!iframe || iframe.dataset.loaded === 'true') return;
+    iframe.dataset.loaded = 'true';
+    loader.hidden = true;
+    root.removeAttribute('aria-busy');
+    setStatus('Build ready');
+  };
+
+  const mount = () => {
+    if (!preview || !screen) return;
     if (active && active.root !== root) active.unload();
     active = { root, unload: () => unload(false) };
     muted = false;
@@ -147,9 +155,7 @@ function initPlayer(root: HTMLElement): void {
     muteButton?.removeAttribute('disabled');
     openOverlay();
 
-    abort?.abort();
-    const controller = new AbortController();
-    abort = controller;
+    window.clearTimeout(loadTimer);
     iframe?.remove();
     const frame = document.createElement('iframe');
     frame.className = 'build-frame';
@@ -160,45 +166,28 @@ function initPlayer(root: HTMLElement): void {
     iframe = frame;
     screen.append(frame);
 
-    const timeout = window.setTimeout(() => {
+    loadTimer = window.setTimeout(() => {
       if (!frame.dataset.loaded) showError();
     }, 12000);
 
-    try {
-      const response = await fetch(src, { signal: controller.signal });
-      if (!response.ok) throw new Error(String(response.status));
-      let html = await response.text();
-      if (!html.trim()) throw new Error('empty');
-      const baseHref = new URL('./', new URL(src, window.location.href)).href;
-      const shimHref = new URL(shim, window.location.href).href;
-      const injection = `<script>window.__portfolioParentOrigin=${JSON.stringify(window.location.origin)};<\/script><base href="${baseHref}"><script src="${shimHref}"><\/script>`;
-      if (/<head[^>]*>/i.test(html)) {
-        html = html.replace(/<head[^>]*>/i, (match) => `${match}${injection}`);
-      } else {
-        html = `<!DOCTYPE html><html><head>${injection}</head><body>${html}</body></html>`;
-      }
-      frame.addEventListener('load', () => {
-        window.clearTimeout(timeout);
-        frame.dataset.loaded = 'true';
-        loader.hidden = true;
-        root.removeAttribute('aria-busy');
-        setStatus('Build ready');
-      });
-      frame.srcdoc = html;
-    } catch (error) {
-      window.clearTimeout(timeout);
-      if ((error as { name?: string }).name === 'AbortError') return;
-      showError();
-    }
+    frame.addEventListener('load', () => {
+      const doc = frame.contentDocument;
+      if (!doc || doc.title === 'Build preview') return;
+      markReady();
+    });
+
+    // srcdoc inherits this page's CSP, which blocks eval(). These builds call eval,
+    // so they have to load as their own document via preview.html.
+    frame.src = preview;
   };
 
   playButton.addEventListener('click', () => {
-    void mount();
+    mount();
   });
 
   restartButton?.addEventListener('click', () => {
     unload(true);
-    void mount();
+    mount();
   });
 
   rotateButton?.addEventListener('click', () => {
@@ -250,7 +239,7 @@ function initPlayer(root: HTMLElement): void {
 
   fallback.querySelector('[data-retry]')?.addEventListener('click', () => {
     unload(true);
-    void mount();
+    mount();
   });
 
   root.addEventListener('keydown', (event) => {
@@ -293,7 +282,16 @@ function initPlayer(root: HTMLElement): void {
     if (!frame || event.source !== frame.contentWindow) return;
     if (event.origin !== 'null' && event.origin !== window.location.origin) return;
     const data = event.data as { source?: string; type?: string } | null;
-    if (!data || data.source !== MESSAGE_SOURCE || data.type !== 'cta') return;
+    if (!data) return;
+    if (data.source === 'portfolio-preview' && data.type === 'ready') {
+      markReady();
+      return;
+    }
+    if (data.source === 'portfolio-preview' && data.type === 'error') {
+      showError();
+      return;
+    }
+    if (data.source !== MESSAGE_SOURCE || data.type !== 'cta') return;
     showToast('CTA clicked');
   });
 

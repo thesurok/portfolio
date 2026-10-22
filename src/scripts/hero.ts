@@ -44,10 +44,14 @@ export function mountHero(canvas: HTMLCanvasElement, variant: HeroVariant = 'wid
   const resize = () => {
     const ratio = Math.min(window.devicePixelRatio || 1, 2);
     const rect = canvas.getBoundingClientRect();
-    canvas.width = Math.max(1, Math.round(rect.width * ratio));
-    canvas.height = Math.max(1, Math.round(rect.height * ratio));
-    context.setTransform(ratio, 0, 0, ratio, 0, 0);
-    if (rect.width < 2 || rect.height < 2) return;
+    if (rect.width < 2 || rect.height < 2 || rect.width > 4096 || rect.height > 4096) return;
+    const width = Math.max(1, Math.round(rect.width * ratio));
+    const height = Math.max(1, Math.round(rect.height * ratio));
+    if (canvas.width !== width || canvas.height !== height) {
+      canvas.width = width;
+      canvas.height = height;
+      context.setTransform(ratio, 0, 0, ratio, 0, 0);
+    }
     const next = countFor(rect.width, rect.height);
     while (particles.length < next) particles.push(particle());
     if (particles.length > next) particles.length = next;
