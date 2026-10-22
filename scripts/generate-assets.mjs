@@ -74,69 +74,12 @@ const og = svg(
   `<rect width="1200" height="630" fill="#101114"/>
    <circle cx="930" cy="320" r="180" fill="none" stroke="#e2a45c" stroke-width="14"/>
    <circle cx="930" cy="320" r="90" fill="#6cb6a6"/>
-   <text x="80" y="250" fill="#e2a45c" font-family="Segoe UI, Arial, sans-serif" font-size="28" letter-spacing="3">INTERACTIVE / HTML5 GAME DEVELOPER</text>
+   <text x="80" y="250" fill="#e2a45c" font-family="Segoe UI, Arial, sans-serif" font-size="28" letter-spacing="3">SENIOR JAVASCRIPT GAME ENGINEER</text>
    <text x="80" y="360" fill="#f2efe8" font-family="Segoe UI, Arial, sans-serif" font-size="84" font-weight="600">Oleh Novytskyi</text>
-   <text x="80" y="440" fill="#a8a297" font-family="Segoe UI, Arial, sans-serif" font-size="32">Real-time 2D and 3D for the browser and mobile</text>`,
+   <text x="80" y="440" fill="#a8a297" font-family="Segoe UI, Arial, sans-serif" font-size="32">HTML5 games in PixiJS and Three.js</text>`,
   1200,
   630,
 );
 await sharp(og).png().toFile(path.join(publicDir, 'og.png'));
 
-const lines = [
-  ['Oleh Novytskyi', 22, 36],
-  ['Interactive / HTML5 Game Developer', 13, 28],
-  ['', 11, 16],
-  ['8 years building high-performance real-time 2D/3D', 12, 20],
-  ['experiences for the browser and mobile.', 12, 28],
-  ['', 11, 12],
-  ['Skills', 14, 24],
-  ['Reel and spin mechanics, animation timelines (GSAP, Spine),', 11, 18],
-  ['particle effects, state machines, asset budgets,', 11, 16],
-  ['cross-device rendering, WebGL shaders.', 11, 24],
-  ['', 11, 12],
-  ['Tools', 14, 24],
-  ['PixiJS, Three.js, WebGL, GSAP, Spine, TypeScript.', 11, 24],
-  ['', 11, 12],
-  ['Location', 14, 24],
-  ['Ukraine', 11, 24],
-  ['', 11, 12],
-  ['GitHub', 14, 24],
-  ['https://github.com/thesurok', 11, 20],
-];
-
-function pdfEscape(value) {
-  return value.replace(/\\/g, '\\\\').replace(/\(/g, '\\(').replace(/\)/g, '\\)');
-}
-
-let stream = 'BT\n';
-lines.forEach((line, index) => {
-  const [text, size, gap] = line;
-  if (index === 0) stream += `/F1 ${size} Tf\n72 740 Td\n(${pdfEscape(text)}) Tj\n`;
-  else stream += `/F1 ${size} Tf\n0 -${gap} Td\n(${pdfEscape(text)}) Tj\n`;
-});
-stream += 'ET\n';
-
-const objects = [
-  '1 0 obj\n<< /Type /Catalog /Pages 2 0 R >>\nendobj\n',
-  '2 0 obj\n<< /Type /Pages /Count 1 /Kids [3 0 R] >>\nendobj\n',
-  '3 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Contents 4 0 R /Resources << /Font << /F1 5 0 R >> >> >>\nendobj\n',
-  `4 0 obj\n<< /Length ${Buffer.byteLength(stream)} >>\nstream\n${stream}endstream\nendobj\n`,
-  '5 0 obj\n<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>\nendobj\n',
-];
-
-let body = '%PDF-1.4\n';
-const offsets = [0];
-for (const object of objects) {
-  offsets.push(Buffer.byteLength(body));
-  body += object;
-}
-const xrefAt = Buffer.byteLength(body);
-let xref = `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
-for (let index = 1; index <= objects.length; index += 1) {
-  xref += `${String(offsets[index]).padStart(10, '0')} 00000 n \n`;
-}
-const trailer = `trailer\n<< /Size ${objects.length + 1} /Root 1 0 R >>\nstartxref\n${xrefAt}\n%%EOF\n`;
-await sharp(svg('<rect width="1" height="1" fill="#000"/>', 1, 1)).metadata();
-const { writeFile } = await import('node:fs/promises');
-await writeFile(path.join(publicDir, 'cv.pdf'), Buffer.from(body + xref + trailer));
 console.log('Assets written');

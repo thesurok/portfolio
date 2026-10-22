@@ -585,11 +585,40 @@ main {
   list-style: none;
 }
 
-.timeline li {
+.timeline > li {
   display: grid;
   gap: 6px;
   padding-left: 16px;
   border-left: 2px solid var(--line);
+}
+
+.timeline .org,
+.timeline > li > p:not(.when),
+.detail-list p {
+  color: var(--muted);
+}
+
+.timeline ul {
+  display: grid;
+  gap: 8px;
+  margin: 4px 0 0;
+  padding-left: 1.15rem;
+}
+
+.timeline ul li {
+  color: var(--muted);
+}
+
+.detail-list {
+  display: grid;
+  gap: 20px;
+  max-width: 46rem;
+  list-style: none;
+}
+
+.detail-list li {
+  display: grid;
+  gap: 6px;
 }
 
 .when {
@@ -648,6 +677,7 @@ main {
 
 @media (max-width: 900px) {
   .hero,
+  .hero:has(.hero-visual),
   .project-layout {
     grid-template-columns: 1fr;
   }

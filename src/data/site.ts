@@ -1,37 +1,68 @@
 export const site = {
   name: 'Oleh Novytskyi',
-  role: 'Interactive / HTML5 Game Developer',
+  role: 'Senior JavaScript Game Engineer',
   pitch:
-    '8 years building high-performance real-time 2D/3D experiences for the browser and mobile.',
-  location: 'Ukraine',
-  email: '',
+    '8 years building high-performance HTML5 games and interactive applications with PixiJS and Three.js.',
+  location: 'Uzhhorod, Ukraine',
+  email: 'oleh.novytskyi@proton.me',
+  phone: '+380506366681',
   github: 'https://github.com/thesurok',
-  linkedin: '',
+  linkedin: 'https://www.linkedin.com/in/oleg-novytskyi',
   telegram: '',
 } as const;
 
 export const skills = [
-  'Reel and spin mechanics',
-  'Animation timelines (GSAP / Spine)',
-  'Particle FX',
-  'State machines',
-  'Asset and performance budgets',
-  'Cross-device rendering',
-  'WebGL shaders',
+  'HTML5 games in PixiJS and Three.js',
+  'Playable ads for acquisition channels',
+  'Internal tools and game engines',
+  'Browser performance and optimization',
+  'Animation pipelines into Three.js',
+  'Client–server game state',
 ] as const;
 
-export const tools = ['PixiJS', 'Three.js', 'WebGL', 'GSAP', 'Spine', 'TypeScript'] as const;
+export const tools = ['JavaScript', 'PixiJS', 'Three.js', 'Blender', 'Webpack', 'Node.js'] as const;
 
 export const experience = [
   {
-    period: '2023 — Present',
-    title: 'Interactive developer',
-    body: 'Real-time 2D and 3D for the browser and mobile. Reel systems, shader scenes, and strict budgets for memory, file size, and first frame.',
+    period: '2019 — Present',
+    title: 'Software Engineer',
+    company: 'PlayToMax',
+    points: [
+      'Built over 300 playable ads across genres, reaching millions of active users. The projects on this site are the ones outside NDA.',
+      'Designed internal tools and game engines that shortened production and made iteration faster.',
+      'Mentored developers and grew technical skill across the team.',
+      'Shipped builds for Meta Ads, Google Ads, TikTok, AppLovin (MAX), Unity Ads, Liftoff, Moloco, and other user-acquisition channels.',
+    ],
+  },
+] as const;
+
+export const education = [
+  {
+    period: '2006 — 2011',
+    title: "Master's degree in Statistics",
+    school: 'Oles Honchar Dnipro National University',
+    location: 'Dnipro, Ukraine',
+  },
+] as const;
+
+export const languages = [
+  { name: 'English', level: 'C1' },
+  { name: 'Ukrainian', level: 'Native' },
+] as const;
+
+export const otherProjects = [
+  {
+    title: 'Sword Play',
+    url: 'https://www.youtube.com/playables/UgkxFQtI21tiK7V0FmAFLgU2Ew2ZUwqhN9KU',
+    body: 'Reimplemented a Unity game in Three.js for the browser, including a converter that brought Unity animations onto skinned meshes. The sword slice depended on Unity math and was rebuilt with the tools available.',
   },
   {
-    period: '2018 — 2023',
-    title: 'HTML5 game developer',
-    body: 'Mini-games and interactive builds, including playable ads, shipped as single-file HTML. PixiJS, GSAP, and Spine carried the animation work.',
+    title: 'Exploding Kittens',
+    body: 'Took over the Facebook Messenger Rooms version and fixed a long-standing server-side state machine that drove the animation.',
+  },
+  {
+    title: 'Spyfall, Werewolves, and Crosswords',
+    body: 'A set of Messenger Rooms games with a PixiJS client and Firebase events on the backend. That work was a lesson in client–server communication.',
   },
 ] as const;
 

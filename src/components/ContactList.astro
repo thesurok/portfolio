@@ -3,6 +3,7 @@ import { site } from '../data/site';
 
 const links: { href: string; label: string; external: boolean }[] = [];
 if (site.email) links.push({ href: `mailto:${site.email}`, label: 'Email', external: false });
+if (site.phone) links.push({ href: `tel:${site.phone}`, label: 'Phone', external: false });
 if (site.linkedin) links.push({ href: site.linkedin, label: 'LinkedIn', external: true });
 if (site.github) links.push({ href: site.github, label: 'GitHub', external: true });
 if (site.telegram) links.push({ href: site.telegram, label: 'Telegram', external: true });
