@@ -20,6 +20,66 @@
   --fit-max: max(240px, calc(100vh - 148px));
 }
 
+.player.is-open {
+  display: block;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  padding: 0;
+  background: #000;
+  overflow: hidden;
+}
+
+.player.is-open .player-toolbar {
+  display: none;
+}
+
+.player.is-open .player-close {
+  position: absolute;
+  z-index: 3;
+  top: max(10px, env(safe-area-inset-top));
+  right: max(10px, env(safe-area-inset-right));
+}
+
+.player.is-open .player-stage {
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: auto;
+}
+
+.player.is-open .player-fit {
+  width: 100%;
+  height: 100%;
+}
+
+.player.is-open .device {
+  position: absolute;
+  inset: 0;
+  left: 0;
+  top: 0;
+  width: auto;
+  height: auto;
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+  transform: none;
+}
+
+.player.is-open .screen {
+  width: 100%;
+  height: 100%;
+  border-radius: 0;
+}
+
+.player.is-open .player-toast {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  bottom: max(16px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+}
+
 .player.is-fullscreen {
   background: var(--bg);
 }

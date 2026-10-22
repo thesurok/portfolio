@@ -10,7 +10,7 @@ interface ActivePlayer {
 let active: ActivePlayer | null = null;
 
 function prefersOverlay(): boolean {
-  return window.matchMedia('(max-width: 800px)').matches;
+  return window.matchMedia('(max-width: 800px), (hover: none) and (pointer: coarse)').matches;
 }
 
 function setPressed(root: HTMLElement, preset: 'phone' | 'tablet', landscape: boolean): void {
