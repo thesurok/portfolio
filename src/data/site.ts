@@ -55,15 +55,7 @@ export const otherProjects = [
     title: 'Sword Play',
     url: 'https://www.youtube.com/playables/UgkxFQtI21tiK7V0FmAFLgU2Ew2ZUwqhN9KU',
     body: 'Reimplemented a Unity game in Three.js for the browser, including a converter that brought Unity animations onto skinned meshes. The sword slice depended on Unity math and was rebuilt with the tools available.',
-  },
-  {
-    title: 'Exploding Kittens',
-    body: 'Took over the Facebook Messenger Rooms version and fixed a long-standing server-side state machine that drove the animation.',
-  },
-  {
-    title: 'Spyfall, Werewolves, and Crosswords',
-    body: 'A set of Messenger Rooms games with a PixiJS client and Firebase events on the backend. That work was a lesson in client–server communication.',
-  },
+  }
 ] as const;
 
 export const techLabels = {
