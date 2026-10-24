@@ -21,8 +21,7 @@ function builtAt(): string {
   return `${new Date().toISOString().slice(0, 16).replace('T', ' ')} UTC`;
 }
 
-// Baked in at build time so a deploy can be checked against the footer.
-// The patch number is raised by scripts/bump-version.mjs on each commit.
-export const siteVersion = import.meta.env.PROD
-  ? `${version} · ${revision()} · ${builtAt()}`
-  : 'dev';
+// Baked in when the page is rendered. The patch number is raised by
+// scripts/bump-version.mjs on each commit. The build time is local-only.
+const release = `${version} · ${revision()}`;
+export const siteVersion = import.meta.env.PROD ? release : `${release} · ${builtAt()}`;
