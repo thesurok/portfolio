@@ -8,7 +8,9 @@ import { visibleProjects, withBase } from '../lib/paths';
 
 const projects = visibleProjects(await getCollection('projects'));
 const featured = projects.filter((project) => project.data.featured);
-const slots = projects.filter((project) => project.data.tags.includes('casino-style'));
+const slots = projects.filter(
+  (project) => project.data.tags.includes('casino-style') && !project.data.featured,
+);
 const showHeroBackground = false;
 const showHeroWidget = true;
 ---
@@ -55,7 +57,7 @@ const showHeroWidget = true;
           <div class="section-head">
             <div>
               <h2 id="slots-title">Slots / Casino concepts</h2>
-              <p>Reel and spin studies.</p>
+              <p>Slots and coin pushers.</p>
             </div>
           </div>
           <div class="project-grid">

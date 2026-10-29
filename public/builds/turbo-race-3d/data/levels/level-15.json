@@ -1,0 +1,101 @@
+{
+    "type": "duel",
+    "name": "DESERT",
+    "length": 3600,
+    "maxAngle": 70,
+    "maxTerrainHeight": 10,
+    "treesDensity": 0.4,
+    "stonesDensity": 0.1,
+    "rocksDensity": 0.005,
+    "roadWidth": 16,
+    "turnsCount": 6,
+    "roadTexture": "textures/desert/road",
+    "terrainTexture": "textures/desert/sand",
+    "bgTexture": "textures/desert/city",
+    "treesTextures": [
+        "textures/desert/palm-1",
+        "textures/desert/palm-2",
+        "textures/desert/palm-3",
+        "textures/desert/palm-4",
+        "textures/desert/palm-5",
+        "textures/desert/palm-6",
+        "textures/desert/palm-7",
+        "textures/desert/palm-8"
+    ],
+    "stonesModels": [
+        "stone-1",
+        "stone-2"
+    ],
+    "stonesTextures": [
+        "textures/desert/mountain"
+    ],
+    "rocksModels": [
+        "rocks"
+    ],
+    "rocksTextures": [
+        "textures/desert/mountain"
+    ],
+    "sunColor": "0xC98D26",
+    "sunIntensity": 2,
+    "skyColor": "0xe6ebfd",
+    "skydomeTexture": "textures/clouds/sky-desert",
+    "traffic": {
+        "densityCarsLeft": 5,
+        "densityCarsRight": 5,
+        "speedRange": {
+            "car-traffic-1": {
+                "min": 45,
+                "max": 50
+            },
+            "car-traffic-2": {
+                "min": 50,
+                "max": 55
+            },
+            "car-traffic-3": {
+                "min": 35,
+                "max": 45
+            },
+            "car-traffic-4": {
+                "min": 30,
+                "max": 40
+            }
+        },
+        "carsList": [
+            "car-traffic-1",
+            "car-traffic-2",
+            "car-traffic-3",
+            "car-traffic-4"
+        ],
+        "probabilityCars": [
+            0.3,
+            0.3,
+            0.3,
+            0.1
+        ]
+    },
+    "mission": {
+        "text": "WIN_AGAINST_YOUR_OPPONENT"
+    },
+    "bots": [
+        {
+            "maxSpeed": 250,
+            "acceleration": 1.5,
+            "steeringSpeed": 2
+        }
+    ],
+    "railings": [
+        {
+            "trackProgress": 0.2,
+            "sectionLength": 15
+        },
+        {
+            "trackProgress": 0.4,
+            "sectionLength": 20
+        },
+        {
+            "trackProgress": 0.7,
+            "sectionLength": 15
+        }
+    ],
+    "obstaclesCount": 4
+}

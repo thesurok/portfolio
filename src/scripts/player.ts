@@ -66,7 +66,8 @@ function initPlayer(root: HTMLElement): void {
   const muteButton = root.querySelector<HTMLButtonElement>('[data-mute]');
   if (!playButton || !loader || !fallback || !screen || !status || !toast) return;
 
-  const preview = root.dataset.preview ?? '';
+  const src = root.dataset.src ?? '';
+  const loadTimeoutMs = Number(root.dataset.loadMs) || 12000;
   let preset: 'phone' | 'tablet' = 'phone';
   let landscape = root.dataset.orientation === 'landscape';
   let iframe: HTMLIFrameElement | null = null;
@@ -139,10 +140,11 @@ function initPlayer(root: HTMLElement): void {
     loader.hidden = true;
     root.removeAttribute('aria-busy');
     setStatus('Build ready');
+    iframe.focus();
   };
 
   const mount = () => {
-    if (!preview || !screen) return;
+    if (!src || !screen) return;
     if (active && active.root !== root) active.unload();
     active = { root, unload: () => unload(false) };
     muted = false;
@@ -168,7 +170,7 @@ function initPlayer(root: HTMLElement): void {
 
     loadTimer = window.setTimeout(() => {
       if (!frame.dataset.loaded) showError();
-    }, 12000);
+    }, loadTimeoutMs);
 
     frame.addEventListener('load', () => {
       const doc = frame.contentDocument;
@@ -176,9 +178,10 @@ function initPlayer(root: HTMLElement): void {
       markReady();
     });
 
-    // srcdoc inherits this page's CSP, which blocks eval(). These builds call eval,
-    // so they have to load as their own document via preview.html.
-    frame.src = preview;
+    // srcdoc inherits this page's CSP, which blocks eval(). The iframe loads a
+    // separate document: preview.html for a single-file build, or the build's
+    // own index.html when the export is a folder of scripts and assets.
+    frame.src = src;
   };
 
   playButton.addEventListener('click', () => {

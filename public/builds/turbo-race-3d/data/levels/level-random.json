@@ -1,0 +1,38 @@
+{
+    "type": "random",
+    "mission": {
+        "text": "RANDOM RACE"
+    },
+    "traffic": {
+        "speedRange": {
+            "car-traffic-1": {
+                "min": 45,
+                "max": 50
+            },
+            "car-traffic-2": {
+                "min": 50,
+                "max": 55
+            },
+            "car-traffic-3": {
+                "min": 35,
+                "max": 45
+            },
+            "car-traffic-4": {
+                "min": 30,
+                "max": 40
+            }
+        },
+        "carsList": [
+            "car-traffic-1",
+            "car-traffic-2",
+            "car-traffic-3",
+            "car-traffic-4"
+        ],
+        "probabilityCars": [
+            0.3,
+            0.3,
+            0.3,
+            0.1
+        ]
+    }
+}

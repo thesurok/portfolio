@@ -1,6 +1,6 @@
 {
   "name": "portfolio",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "private": true,
   "type": "module",
   "description": "Portfolio of Oleh Novytskyi, a senior JavaScript game engineer.",

@@ -1,0 +1,87 @@
+{
+    "type": "time",
+    "name": "DESERT",
+    "length": 4200,
+    "maxAngle": 70,
+    "maxTerrainHeight": 10,
+    "treesDensity": 0.4,
+    "stonesDensity": 0.1,
+    "rocksDensity": 0.005,
+    "roadWidth": 16,
+    "turnsCount": 18,
+    "roadTexture": "textures/desert/road",
+    "terrainTexture": "textures/desert/sand",
+    "bgTexture": "textures/desert/city",
+    "treesTextures": [
+        "textures/desert/palm-1",
+        "textures/desert/palm-2",
+        "textures/desert/palm-3",
+        "textures/desert/palm-4",
+        "textures/desert/palm-5",
+        "textures/desert/palm-6",
+        "textures/desert/palm-7",
+        "textures/desert/palm-8"
+    ],
+    "stonesModels": [
+        "stone-1",
+        "stone-2"
+    ],
+    "stonesTextures": [
+        "textures/desert/mountain"
+    ],
+    "rocksModels": [
+        "rocks"
+    ],
+    "rocksTextures": [
+        "textures/desert/mountain"
+    ],
+    "sunColor": "0xC98D26",
+    "sunIntensity": 2,
+    "skyColor": "0xe6ebfd",
+    "skydomeTexture": "textures/clouds/sky-desert",
+    "traffic": {
+        "densityCarsLeft": 12,
+        "densityCarsRight": 14,
+        "speedRange": {
+            "car-traffic-1": {
+                "min": 45,
+                "max": 50
+            },
+            "car-traffic-2": {
+                "min": 50,
+                "max": 55
+            },
+            "car-traffic-3": {
+                "min": 35,
+                "max": 45
+            },
+            "car-traffic-4": {
+                "min": 30,
+                "max": 40
+            }
+        },
+        "carsList": [
+            "car-traffic-1",
+            "car-traffic-2",
+            "car-traffic-3",
+            "car-traffic-4"
+        ],
+        "probabilityCars": [
+            0.3,
+            0.3,
+            0.3,
+            0.1
+        ]
+    },
+    "mission": {
+        "star-2": {
+            "minutes": 1,
+            "seconds": 8
+        },
+        "star-3": {
+            "minutes": 0,
+            "seconds": 53
+        }
+    },
+    "obstaclesCount": 16
+}

@@ -20,6 +20,10 @@ const projects = defineCollection({
       order: z.number().int().default(0),
       build: z.object({
         path: z.string(),
+        // A folder export is served as its own document. Relative scripts and
+        // assets then resolve against index.html. A single-file build is still
+        // rewritten through preview.html.
+        folder: z.boolean().default(false),
         orientation: z.enum(['portrait', 'landscape', 'both']),
         sizeKB: z.number().positive().optional(),
         fpsTarget: z.number().positive().optional(),

@@ -5,7 +5,8 @@ import type { ImageMetadata } from 'astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import BuildPlayer from '../../components/BuildPlayer.astro';
 import { site, tagLabel, techLabels } from '../../data/site';
-import { buildSizeKB } from '../../lib/build-size';
+import { buildSizeKB, formatBuildSize } from '../../lib/build-size';
+import { withBase } from '../../lib/paths';
 
 export async function getStaticPaths() {
   const projects = await getCollection('projects');
@@ -23,6 +24,10 @@ const poster = project.data.poster as ImageMetadata;
 const og = await getImage({ src: poster, width: 1200, height: 630, format: 'jpeg' });
 const ogImage = new URL(og.src, Astro.site).href;
 const sizeKB = project.data.build.sizeKB ?? buildSizeKB(project.data.build.path);
+const sizeLabel = formatBuildSize(sizeKB);
+const playerSrc = project.data.build.folder
+  ? withBase(project.data.build.path)
+  : withBase(`preview.html?build=${encodeURIComponent(project.data.slug)}`);
 const description = project.data.summary;
 const creativeWork = {
   '@context': 'https://schema.org',
@@ -59,6 +64,8 @@ const creativeWork = {
         orientation={project.data.build.orientation}
         poster={poster}
         video={project.data.video}
+        src={playerSrc}
+        loadTimeoutMs={project.data.build.folder ? 30000 : 12000}
       />
       <div class="project-details">
         <p class="lead">{project.data.summary}</p>
@@ -100,8 +107,8 @@ const creativeWork = {
           <h2>Build metrics</h2>
           <dl class="metrics">
             <div>
-              <dt class="metric-label">File size</dt>
-              <dd>{sizeKB} KB</dd>
+              <dt class="metric-label">Build size</dt>
+              <dd>{sizeLabel}</dd>
             </div>
             {
               project.data.build.fpsTarget && (

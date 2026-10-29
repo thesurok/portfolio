@@ -11,7 +11,7 @@ tags:
   - runner
   - playable
 featured: true
-order: 0
+order: 1
 build:
   path: builds/heroes-and-dragons-coin-run/index.html
   orientation: both

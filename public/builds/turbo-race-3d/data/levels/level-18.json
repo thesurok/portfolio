@@ -1,0 +1,101 @@
+{
+    "type": "race",
+    "name": "SNOW",
+    "length": 3800,
+    "maxAngle": 70,
+    "maxTerrainHeight": 10,
+    "treesDensity": 0.4,
+    "stonesDensity": 0.1,
+    "rocksDensity": 0.005,
+    "roadWidth": 16,
+    "turnsCount": 14,
+    "roadTexture": "textures/snow/road",
+    "terrainTexture": "textures/snow/snow",
+    "bgTexture": "textures/snow/mountains",
+    "treesTextures": [
+        "textures/snow/tree-1",
+        "textures/snow/tree-2"
+    ],
+    "stonesModels": [
+        "stone-1",
+        "stone-2"
+    ],
+    "stonesTextures": [
+        "textures/snow/stones"
+    ],
+    "rocksModels": [
+        "rocks"
+    ],
+    "rocksTextures": [
+        "textures/snow/mountain"
+    ],
+    "sunColor": "0xe0ecf2",
+    "sunIntensity": 1,
+    "skyColor": "0xa5d8f1",
+    "skydomeTexture": "textures/clouds/sky-snow",
+    "traffic": {
+        "densityCarsLeft": 3,
+        "densityCarsRight": 3,
+        "speedRange": {
+            "car-traffic-1": {
+                "min": 45,
+                "max": 50
+            },
+            "car-traffic-2": {
+                "min": 50,
+                "max": 55
+            },
+            "car-traffic-3": {
+                "min": 35,
+                "max": 45
+            },
+            "car-traffic-4": {
+                "min": 30,
+                "max": 40
+            }
+        },
+        "carsList": [
+            "car-traffic-1",
+            "car-traffic-2",
+            "car-traffic-3",
+            "car-traffic-4"
+        ],
+        "probabilityCars": [
+            0.3,
+            0.3,
+            0.3,
+            0.1
+        ]
+    },
+    "mission": {
+        "text": "OVERTAKE_EVERYONE"
+    },
+    "bots": [
+        {
+            "maxSpeed": 240,
+            "acceleration": 1.6,
+            "steeringSpeed": 2.2
+        },
+        {
+            "maxSpeed": 220,
+            "acceleration": 1.5,
+            "steeringSpeed": 2.2
+        },
+        {
+            "maxSpeed": 250,
+            "acceleration": 1.5,
+            "steeringSpeed": 2.2
+        }
+    ],
+    "obstaclesCount": 10,
+    "railings": [
+        {
+            "trackProgress": 0.2,
+            "sectionLength": 15
+        },
+        {
+            "trackProgress": 0.8,
+            "sectionLength": 15
+        }
+    ]
+}

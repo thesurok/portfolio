@@ -11,13 +11,14 @@ interface Props {
   orientation: 'portrait' | 'landscape' | 'both';
   poster: ImageMetadata;
   video?: string;
+  src: string;
+  loadTimeoutMs?: number;
 }
 
-const { slug, title, orientation, poster, video } = Astro.props;
+const { slug, title, orientation, poster, video, src, loadTimeoutMs = 12000 } = Astro.props;
 const landscape = orientation === 'landscape';
 const width = landscape ? 844 : 390;
 const height = landscape ? 390 : 844;
-const preview = withBase(`preview.html?build=${encodeURIComponent(slug)}`);
 const videoSrc = video ? withBase(video) : undefined;
 ---
 
@@ -25,7 +26,8 @@ const videoSrc = video ? withBase(video) : undefined;
   class="player"
   id={`player-${slug}`}
   data-build-player
-  data-preview={preview}
+  data-src={src}
+  data-load-ms={loadTimeoutMs}
   data-orientation={orientation}
   data-title={`${title} build`}
   style={`--w:${width};--h:${height};--bezel:12px;`}
@@ -58,7 +60,7 @@ const videoSrc = video ? withBase(video) : undefined;
             )
           }
           <button type="button" data-retry>Try again</button>
-          <a href={preview} target="_blank" rel="noreferrer">Open in new tab</a>
+          <a href={src} target="_blank" rel="noreferrer">Open in new tab</a>
         </div>
       </DeviceFrame>
     </div>
@@ -78,7 +80,7 @@ const videoSrc = video ? withBase(video) : undefined;
       <button type="button" data-rotate>Rotate</button>
       <button type="button" data-fullscreen aria-pressed="false">Full screen</button>
       <button type="button" data-mute disabled aria-pressed="false">Mute</button>
-      <a href={preview} target="_blank" rel="noreferrer">Open in new tab</a>
+      <a href={src} target="_blank" rel="noreferrer">Open in new tab</a>
     </div>
     <p class="mute-hint">Sound may play after the build starts.</p>
   </div>
